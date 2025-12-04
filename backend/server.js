@@ -7,194 +7,347 @@ const { sql, getPool } = require('./db');
 const app = express();
 const PORT = 3000;
 
-// Middlewares
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Serve frontend
+// Serve static files
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// =========================
-// API 1: Top khóa học rating cao (usp_GetTopRatedCourses)
-// =========================
-app.get('/api/top-courses', async (req, res) => {
-  const { year, minReview } = req.query;
+// =============================================
+// FEEDBACK APIs
+// =============================================
 
-  try {
-    const pool = await getPool();
-
-    // TODO: Gọi thủ tục usp_GetTopRatedCourses @PublishedYear, @MinReview
-    // Ví dụ mẫu:
-    /*
-    const result = await pool.request()
-      .input('PublishedYear', sql.Int, parseInt(year))
-      .input('MinReview', sql.Int, parseInt(minReview))
-      .execute('usp_GetTopRatedCourses');
-
-    return res.json(result.recordset);
-    */
-
-    return res.status(501).json({ 
-      todo: true,
-      message: 'TODO: Implement usp_GetTopRatedCourses call in backend.' 
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Database error' });
-  }
+// API 0: Get student info
+app.get('/api/student/:studentId/info', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const pool = await getPool();
+        
+        const result = await pool.request()
+            .input('studentId', sql.Char(10), studentId)
+            .query(`
+                SELECT 
+                    s.Student_id,
+                    u.F_name,
+                    u.L_name,
+                    u.L_name + ' ' + u.F_name AS Full_name
+                FROM STUDENT s
+                INNER JOIN [USER] u ON s.Student_id = u.User_id
+                WHERE s.Student_id = @studentId
+            `);
+        
+        if (result.recordset.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy học viên'
+            });
+        }
+        
+        res.json({
+            success: true,
+            data: result.recordset[0]
+        });
+    } catch (err) {
+        console.error('Error in GET /api/student/:studentId/info:', err);
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
 });
 
-// =========================
-// API 2: Thống kê course theo giảng viên (sp_GetTeacherCourseFeedbackStats)
-// =========================
-app.get('/api/teacher/:teacherId/courses', async (req, res) => {
-  const { teacherId } = req.params;
-
-  try {
-    const pool = await getPool();
-
-    // TODO: Gọi sp_GetTeacherCourseFeedbackStats @TeacherId
-    /*
-    const result = await pool.request()
-      .input('TeacherId', sql.Char(10), teacherId)
-      .execute('sp_GetTeacherCourseFeedbackStats');
-
-    return res.json(result.recordset);
-    */
-
-    return res.status(501).json({
-      todo: true,
-      message: 'TODO: Implement sp_GetTeacherCourseFeedbackStats call in backend.'
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Database error' });
-  }
+// API 1: Get student's registered courses
+app.get('/api/student/:studentId/courses', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const pool = await getPool();
+        
+        const result = await pool.request()
+            .input('studentId', sql.Char(10), studentId)
+            .query(`
+                SELECT 
+                    r.Cour_id,
+                    c.Cour_name,
+                    r.Learning_progress,
+                    f.Rating,
+                    f.Comment,
+                    f.Date_rat,
+                    CASE 
+                        WHEN f.Rating IS NULL THEN 'Chưa đánh giá'
+                        WHEN DATEDIFF(DAY, f.Date_rat, GETDATE()) <= 30 THEN 'Có thể sửa'
+                        ELSE 'Không thể sửa'
+                    END AS Status,
+                    DATEDIFF(DAY, f.Date_rat, GETDATE()) AS DaysAgo
+                FROM REGISTER r
+                INNER JOIN COURSE c ON r.Cour_id = c.Course_id
+                LEFT JOIN FEEDBACK f ON r.Stu_id = f.Stu_id AND r.Cour_id = f.Cour_id
+                WHERE r.Stu_id = @studentId
+                ORDER BY c.Cour_name
+            `);
+        
+        res.json({
+            success: true,
+            data: result.recordset
+        });
+    } catch (err) {
+        console.error('Error in GET /api/student/:studentId/courses:', err);
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
 });
 
-// =========================
-// API 3: Xếp loại giảng viên (fn_RankTeacher)
-// =========================
+// API 2: Add new feedback
+app.post('/api/feedback/add', async (req, res) => {
+    try {
+        const { studentId, courseId, rating, comment } = req.body;
+        const pool = await getPool();
+        
+        await pool.request()
+            .input('Stu_id', sql.Char(10), studentId)
+            .input('Cour_id', sql.Char(10), courseId)
+            .input('Rating', sql.Int, rating)
+            .input('Comment', sql.VarChar(3000), comment)
+            .execute('usp_AddFeedback');
+        
+        res.json({
+            success: true,
+            message: 'Thêm đánh giá thành công!'
+        });
+    } catch (err) {
+        console.error('Error in POST /api/feedback/add:', err);
+        res.status(400).json({
+            success: false,
+            message: err.message
+        });
+    }
+});
+
+// API 3: Update feedback
+app.put('/api/feedback/update', async (req, res) => {
+    try {
+        const { studentId, courseId, newRating, newComment } = req.body;
+        const pool = await getPool();
+        
+        await pool.request()
+            .input('Stu_id', sql.Char(10), studentId)
+            .input('Cour_id', sql.Char(10), courseId)
+            .input('NewRating', sql.Int, newRating)
+            .input('NewComment', sql.VarChar(3000), newComment)
+            .execute('usp_UpdateFeedback');
+        
+        res.json({
+            success: true,
+            message: 'Cập nhật đánh giá thành công!'
+        });
+    } catch (err) {
+        console.error('Error in PUT /api/feedback/update:', err);
+        res.status(400).json({
+            success: false,
+            message: err.message
+        });
+    }
+});
+
+// API 4: Delete feedback
+app.delete('/api/feedback/delete', async (req, res) => {
+    try {
+        const { studentId, courseId } = req.body;
+        const pool = await getPool();
+        
+        await pool.request()
+            .input('Stu_id', sql.Char(10), studentId)
+            .input('Cour_id', sql.Char(10), courseId)
+            .execute('sp_DeleteFeedback');
+        
+        res.json({
+            success: true,
+            message: 'Xóa đánh giá thành công!'
+        });
+    } catch (err) {
+        console.error('Error in DELETE /api/feedback/delete:', err);
+        res.status(400).json({
+            success: false,
+            message: err.message
+        });
+    }
+});
+
+// API 5: Get feedback history
+app.get('/api/student/:studentId/feedback-history', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const pool = await getPool();
+        
+        const result = await pool.request()
+            .input('studentId', sql.Char(10), studentId)
+            .query(`
+                SELECT 
+                    f.Date_rat,
+                    f.Cour_id,
+                    c.Cour_name,
+                    f.Rating,
+                    f.Comment,
+                    CASE 
+                        WHEN DATEDIFF(DAY, f.Date_rat, GETDATE()) <= 30 THEN 'Có thể sửa/xóa'
+                        ELSE 'Đã khóa'
+                    END AS Status,
+                    DATEDIFF(DAY, f.Date_rat, GETDATE()) AS DaysAgo
+                FROM FEEDBACK f
+                INNER JOIN COURSE c ON f.Cour_id = c.Course_id
+                WHERE f.Stu_id = @studentId
+                ORDER BY f.Date_rat DESC
+            `);
+        
+        res.json({
+            success: true,
+            data: result.recordset
+        });
+    } catch (err) {
+        console.error('Error in GET /api/student/:studentId/feedback-history:', err);
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
+});
+
+// API 6: Get feedback statistics
+app.get('/api/student/:studentId/feedback-stats', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const pool = await getPool();
+        
+        // Get total feedback count
+        const totalResult = await pool.request()
+            .input('studentId', sql.Char(10), studentId)
+            .query('SELECT COUNT(*) AS TotalFeedback FROM FEEDBACK WHERE Stu_id = @studentId');
+        
+        // Get average rating
+        const avgResult = await pool.request()
+            .input('studentId', sql.Char(10), studentId)
+            .query('SELECT AVG(CAST(Rating AS FLOAT)) AS AvgRating FROM FEEDBACK WHERE Stu_id = @studentId');
+        
+        // Get pending courses count
+        const pendingResult = await pool.request()
+            .input('studentId', sql.Char(10), studentId)
+            .query(`
+                SELECT COUNT(*) AS PendingCourses
+                FROM REGISTER r
+                WHERE r.Stu_id = @studentId 
+                  AND r.Learning_progress >= 50
+                  AND NOT EXISTS (
+                    SELECT 1 FROM FEEDBACK f 
+                    WHERE f.Stu_id = r.Stu_id AND f.Cour_id = r.Cour_id
+                  )
+            `);
+        
+        res.json({
+            success: true,
+            stats: {
+                totalFeedback: totalResult.recordset[0].TotalFeedback,
+                avgRating: avgResult.recordset[0].AvgRating || 0,
+                pendingCourses: pendingResult.recordset[0].PendingCourses
+            }
+        });
+    } catch (err) {
+        console.error('Error in GET /api/student/:studentId/feedback-stats:', err);
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
+});
+
+// =============================================
+// TASK 2.3 - STORED PROCEDURES
+// =============================================
+
+// API 7: Get top rated courses (2.3 - Thủ tục 1)
+app.get('/api/courses/top-rated', async (req, res) => {
+    try {
+        const { publishedYear, minReview } = req.query;
+        const pool = await getPool();
+        
+        const result = await pool.request()
+            .input('PublishedYear', sql.Int, parseInt(publishedYear || new Date().getFullYear()))
+            .input('MinReview', sql.Int, parseInt(minReview || 1))
+            .execute('usp_GetTopRatedCourses');
+        
+        res.json({
+            success: true,
+            data: result.recordset
+        });
+    } catch (err) {
+        console.error('Error in GET /api/courses/top-rated:', err);
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
+});
+
+// API 8: Get teacher course feedback stats (2.3 - Thủ tục 2)
+app.get('/api/teacher/:teacherId/course-stats', async (req, res) => {
+    try {
+        const { teacherId } = req.params;
+        const pool = await getPool();
+        
+        const result = await pool.request()
+            .input('TeacherId', sql.Char(10), teacherId)
+            .execute('usp_GetTeacherCourseStats');
+        
+        res.json({
+            success: true,
+            data: result.recordset
+        });
+    } catch (err) {
+        console.error('Error in GET /api/teacher/:teacherId/course-stats:', err);
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
+});
+
+// API 9: Get teacher rank
 app.get('/api/teacher/:teacherId/rank', async (req, res) => {
-  const { teacherId } = req.params;
-
-  try {
-    const pool = await getPool();
-
-    // TODO: SELECT dbo.fn_RankTeacher(@Tea_id)
-    /*
-    const result = await pool.request()
-      .input('Tea_id', sql.Char(10), teacherId)
-      .query('SELECT dbo.fn_RankTeacher(@Tea_id) AS RankText');
-
-    return res.json(result.recordset[0]);
-    */
-
-    return res.status(501).json({
-      todo: true,
-      message: 'TODO: Implement fn_RankTeacher call in backend.'
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Database error' });
-  }
-});
-
-// =========================
-// API 4: Xếp hạng loyalty sinh viên (fn_CalcStudentLoyaltyRank)
-// =========================
-app.get('/api/student/:stuId/loyalty', async (req, res) => {
-  const { stuId } = req.params;
-
-  try {
-    const pool = await getPool();
-
-    // TODO: SELECT dbo.fn_CalcStudentLoyaltyRank(@StuID)
-    /*
-    const result = await pool.request()
-      .input('StuID', sql.Char(10), stuId)
-      .query('SELECT dbo.fn_CalcStudentLoyaltyRank(@StuID) AS Loyalty');
-
-    return res.json(result.recordset[0]);
-    */
-
-    return res.status(501).json({
-      todo: true,
-      message: 'TODO: Implement fn_CalcStudentLoyaltyRank call in backend.'
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Database error' });
-  }
-});
-
-// =========================
-// API 5: Feedback – Add / Update / Delete
-// dùng usp_AddFeedback, usp_UpdateFeedback, sp_DeleteFeedback
-// =========================
-
-app.post('/api/feedback', async (req, res) => {
-    const { Stu_id, Cour_id, Rating, Comment } = req.body;
-
     try {
+        const { teacherId } = req.params;
         const pool = await getPool();
-
-        // TODO: EXEC usp_AddFeedback @Stu_id, @Cour_id, @Rating, @Comment
-        await pool.request()
-        .input('Stu_id', sql.Char(10), Stu_id)
-        .input('Cour_id', sql.Char(10), Cour_id)
-        .input('Rating', sql.Int, Rating)
-        .input('Comment', sql.VarChar(3000), Comment)
-        .execute('usp_AddFeedback');
-
-        return res.json({ success: true });
+        
+        const result = await pool.request()
+            .input('TeacherId', sql.Char(10), teacherId)
+            .query('SELECT dbo.fn_RankTeacher(@TeacherId) AS Rank');
+        
+        res.json({
+            success: true,
+            rank: result.recordset[0].Rank
+        });
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Database error' });
+        console.error('Error in GET /api/teacher/:teacherId/rank:', err);
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
     }
 });
 
-app.put('/api/feedback', async (req, res) => {
-    const { Stu_id, Cour_id, Rating, Comment } = req.body;
-
-    try {
-        const pool = await getPool();
-
-        // TODO: EXEC usp_UpdateFeedback @Stu_id, @Cour_id, @NewRating, @NewComment
-        await pool.request()
-        .input('Stu_id', sql.Char(10), Stu_id)
-        .input('Cour_id', sql.Char(10), Cour_id)
-        .input('NewRating', sql.Int, Rating)
-        .input('NewComment', sql.VarChar(3000), Comment)
-        .execute('usp_UpdateFeedback');
-
-        return res.json({ success: true });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Database error' });
-    }
-});
-
-app.delete('/api/feedback', async (req, res) => {
-  const { Stu_id, Cour_id } = req.body;
-
-  try {
-    const pool = await getPool();
-
-    // TODO: EXEC sp_DeleteFeedback @Stu_id, @Cour_id
-    await pool.request()
-      .input('Stu_id', sql.Char(10), Stu_id)
-      .input('Cour_id', sql.Char(10), Cour_id)
-      .execute('sp_DeleteFeedback');
-
-    return res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Database error' });
-  }
-});
-
+// =============================================
 // Start server
+// =============================================
 app.listen(PORT, () => {
-  console.log(`Educity backend skeleton listening at http://localhost:${PORT}`);
+    console.log(`\n   Server running on http://localhost:${PORT}`);
+    console.log(`   Feedback API endpoints:`);
+    console.log(`   GET  /api/student/:studentId/courses`);
+    console.log(`   POST /api/feedback/add`);
+    console.log(`   PUT  /api/feedback/update`);
+    console.log(`   DELETE /api/feedback/delete`);
+    console.log(`   GET  /api/student/:studentId/feedback-history`);
+    console.log(`   GET  /api/student/:studentId/feedback-stats`);
+    console.log(`   \n   Task 2.3 Procedures:`);
+    console.log(`   GET  /api/courses/top-rated?publishedYear=2024&minReview=2`);
+    console.log(`   GET  /api/teacher/:teacherId/course-stats\n`);
 });

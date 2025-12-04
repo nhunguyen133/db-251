@@ -22,7 +22,7 @@
             </div>
 
             <nav class="menu">
-                <button class="menu-item active" data-target="panel-feedback">
+                <button class="menu-item" data-target="panel-feedback">
                     <span class="material-icons" style="font-size: 18px;">star</span>
                     Feedback
                 </button>
@@ -30,7 +30,7 @@
                     <span class="material-icons" style="font-size: 18px;">bar_chart</span>
                     Top khóa học
                 </button>
-                <button class="menu-item" data-target="panel-teacher">
+                <button class="menu-item active" data-target="panel-teacher">
                     <span class="material-icons" style="font-size: 18px;">school</span>
                     Giảng viên
                 </button>
@@ -51,8 +51,8 @@
                 <p>Welcome back!</p>
             </header>
 
-            <!-- Panel: Feedback -->
-            <section id="panel-feedback" class="panel active">
+        <!-- Panel: Feedback -->
+            <section id="panel-feedback" class="panel">
                 <div class="panel-header">
                     <h3>
                         <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">rate_review</span>
@@ -235,7 +235,7 @@
                 </div>
             </section>            
             
-            <!-- Panel: Top khóa học -->
+        <!-- Panel: Top khóa học -->
             <section id="panel-top-courses" class="panel">
                 <div class="panel-header">
                     <h3>Top khóa học theo Rating</h3>
@@ -273,32 +273,29 @@
                 </div>
             </section>
 
-            <!-- Panel: Giảng viên -->
-            <section id="panel-teacher" class="panel">
+        <!-- Panel: Giảng viên -->
+            <section id="panel-teacher" class="panel active">
                 <div class="panel-header">
                     <h3>Dashboard giảng viên</h3>
-                    <p>Sử dụng <code>sp_GetTeacherCourseFeedbackStats</code> và <code>fn_RankTeacher</code>.</p>
                 </div>
 
                 <form id="form-teacher" class="card form-inline">
                     <div class="form-group">
-                    <label for="teacherId">Mã giảng viên (Teacher_id)</label>
-                    <input type="text" id="teacherId" value="U000000001" maxlength="10" required />
+                        <label for="teacherId">Mã giảng viên</label>
+                        <input type="text" id="teacherId" value="U000000001" maxlength="10" required />
                     </div>
                     <button type="submit" class="btn-primary">Xem thống kê</button>
-                    <span class="form-note">Ví dụ dữ liệu mẫu: U000000001 - U000000005.</span>
                 </form>
 
-                <div class="grid-two">
-                    <div class="card">
+                <!-- <div class="grid-two"> -->
+                    <!-- <div class="card">
                         <h4>Xếp loại giảng viên</h4>
                         <p class="small">Gọi function <code>fn_RankTeacher</code>.</p>
                         <div id="teacher-rank" class="metric-large">—</div>
-                    </div>
+                    </div> -->
 
                     <div class="card">
                         <h4>Thống kê khóa học của giảng viên</h4>
-                        <p class="small">Thủ tục <code>sp_GetTeacherCourseFeedbackStats</code>.</p>
                         <table class="table small" id="table-teacher-courses">
                             <thead>
                                 <tr>
@@ -307,17 +304,19 @@
                                     <th>#Feedback</th>
                                     <th>Rating TB</th>
                                     <th>#Đăng ký</th>
-                                    <th>Điểm TB cuối khóa</th>
+                                    <th>Điểm TB</th>
+                                    <th>Chứng chỉ</th>
+                                    <th>Doanh thu</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr class="placeholder-row">
-                                    <td colspan="6">Chưa có dữ liệu. Hãy nhập mã giảng viên và bấm "Xem thống kê".</td>
+                                    <td colspan="8">Chưa có dữ liệu. Hãy nhập mã giảng viên và bấm "Xem thống kê".</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
+                <!-- </div> -->
             </section>
 
             <!-- Panel: Học viên -->
@@ -333,7 +332,7 @@
                         <input type="text" id="stuId" value="U000000006" maxlength="10" required />
                     </div>
                     <button type="submit" class="btn-primary">Xem hạng thành viên</button>
-                    <span class="form-note">Ví dụ: U000000006 – U000000010 trong bảng STUDENT.</span>
+                    <span class="form-note">Ví dụ: U000000006 - U000000010 trong bảng STUDENT.</span>
                 </form>
 
                 <div class="card">
@@ -345,8 +344,13 @@
         </main>
     </div>
 
+    <!-- Core scripts -->
     <script src="app.js"></script>
+    
+    <!-- Panel scripts -->
     <script src="feedback.js"></script>
-    <script src="procedures.js"></script>
+    <script src="top-courses.js"></script>
+    <script src="teacher-courses-rank.js"></script>
+    <script src="student-rank.js"></script>
 </body>
 </html>

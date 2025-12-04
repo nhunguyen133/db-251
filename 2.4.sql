@@ -68,17 +68,25 @@ END;
 GO
 
 -----------------------------
--- Test (Cần chuẩn bị dữ liệu và các câu test mới)
+-- Test
 -----------------------------
-SELECT dbo.fn_RankTeacher('U000000001') AS TeacherRank;
+SELECT dbo.fn_RankTeacher('U000000001') AS RankingStatus;
+GO
+
 SELECT 
     t.Teacher_id,
-    u.F_name + ' ' + u.L_name AS FullName,
-    dbo.fn_RankTeacher(t.Teacher_id) AS RankLevel
+    u.L_name + ' ' + u.F_name AS TeacherName,
+    t.Expertise,
+    dbo.fn_RankTeacher(t.Teacher_id) AS RankingStatus
 FROM TEACHER t
-JOIN [USER] u ON u.User_id = t.Teacher_id;
+JOIN [USER] u ON t.Teacher_id = u.User_id;
 GO
------------------------------
+
+-- Test trường hợp 'N/A'
+SELECT dbo.fn_RankTeacher('U999999999') AS RankingStatus;
+GO
+
+----------------------------------------------------------------------------------------
 
 ------------------------------
 -- HÀM 2: Xếp hạng thành viên (LOYALTY) ---
@@ -94,7 +102,7 @@ AS
 BEGIN
     -- 1. Kiểm tra tham số
     IF NOT EXISTS (SELECT 1 FROM STUDENT WHERE Student_id = @StuID)
-        RETURN N'Lỗi: Sinh viên không tồn tại';
+        RETURN 'Error: Student does not exist.';
 
     DECLARE @LoyaltyPoints INT = 0;
 
@@ -138,27 +146,45 @@ BEGIN
     -- 4. Xếp hạng
     DECLARE @Rank NVARCHAR(50);
     IF @LoyaltyPoints >= 500
-        SET @Rank = N'Hạng Kim Cương (Diamond)';
+        SET @Rank = 'Diamond';
     ELSE IF @LoyaltyPoints >= 200
-        SET @Rank = N'Hạng Vàng (Gold)';
+        SET @Rank = 'Gold';
     ELSE IF @LoyaltyPoints >= 100
-        SET @Rank = N'Hạng Bạc (Silver)';
+        SET @Rank = 'Silver';
     ELSE
-        SET @Rank = N'Thành viên Mới (New Member)';
+        SET @Rank = 'New Member';
 
-    RETURN @Rank + N' (Points: ' + CAST(@LoyaltyPoints AS NVARCHAR(20)) + N')';
+    RETURN @Rank + ' (Points: ' + CAST(@LoyaltyPoints AS NVARCHAR(20)) + ')';
 END;
 GO
 
 -----------------------------
--- Test (Cần chuẩn bị dữ liệu và các câu test mới)
+-- Test
 -----------------------------
 SELECT dbo.fn_CalcStudentLoyaltyRank('U000000006') AS LoyaltyRank;
+GO
+
 SELECT 
     s.Student_id,
-    u.F_name + ' ' + u.L_name AS FullName,
+    u.L_name + ' ' + u.F_name AS StudentName,
     dbo.fn_CalcStudentLoyaltyRank(s.Student_id) AS LoyaltyRank
 FROM STUDENT s
-JOIN [USER] u ON u.User_id = s.Student_id;
+JOIN [USER] u ON s.Student_id = u.User_id
+WHERE s.Student_id IN ('U000000009', 'U000000010');
 GO
------------------------------
+
+SELECT 
+    s.Student_id,
+    u.L_name + ' ' + u.F_name AS StudentName,
+    dbo.fn_CalcStudentLoyaltyRank(s.Student_id) AS LoyaltyRank
+FROM STUDENT s
+JOIN [USER] u ON s.Student_id = u.User_id
+GO
+
+-- Test trường hợp Student có Payment_status = 'pending'
+SELECT dbo.fn_CalcStudentLoyaltyRank('U000000007') AS LoyaltyRank;
+GO
+
+-- Test trường hợp Student không tồn tại
+SELECT dbo.fn_CalcStudentLoyaltyRank('U999999998') AS LoyaltyRank;
+GO
