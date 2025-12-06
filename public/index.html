@@ -241,7 +241,7 @@
                     <input type="number" id="year" name="year" value="2024" required />
                     </div>
                     <div class="form-group">
-                    <label for="minReview">Tối thiểu số lượt đánh giá</label>
+                    <label for="minReview">Số lượt đánh giá tối thiểu</label>
                     <input type="number" id="minReview" name="minReview" value="2" min="1" required />
                     </div>
                     <button type="submit" class="btn-primary">Xem thống kê</button>
@@ -251,11 +251,25 @@
                     <table class="table" id="table-top-courses">
                     <thead>
                     <tr>
-                        <th>Mã KH</th>
-                        <th>Tên khóa học</th>
-                        <th>Giảng viên</th>
-                        <th>Số lượt đánh giá</th>
-                        <th>Điểm TB</th>
+                        <th onclick="handleSort('CourseID')" style="text-align: center; cursor: pointer; user-select: none;">
+                            Mã khóa học <span id="icon-CourseID" class="sort-icon"></span>
+                        </th>
+                        
+                        <th onclick="handleSort('CourseName')" style="text-align: center; cursor: pointer; user-select: none;">
+                            Tên khóa học <span id="icon-CourseName" class="sort-icon"></span>
+                        </th>
+                        
+                        <th onclick="handleSort('TeacherName')" style="cursor: pointer; user-select: none;">
+                            Giảng viên <span id="icon-TeacherName" class="sort-icon"></span>
+                        </th>
+                
+                        <th onclick="handleSort('TotalFeedbacks')" style="text-align: center; cursor: pointer; user-select: none;">
+                            Số lượt đánh giá <span id="icon-TotalFeedbacks" class="sort-icon"></span>
+                        </th>
+                
+                        <th colspan="2" onclick="handleSort('AvgRating')" style="text-align: center; cursor: pointer; user-select: none;">
+                            Điểm trung bình <span id="icon-AvgRating" class="sort-icon"></span>
+                        </th>
                     </tr>
                     </thead>
                     <tbody>

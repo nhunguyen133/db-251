@@ -268,7 +268,7 @@ app.get('/api/courses/top-rated', async (req, res) => {
         
         const result = await pool.request()
             .input('PublishedYear', sql.Int, parseInt(publishedYear || new Date().getFullYear()))
-            .input('MinReview', sql.Int, parseInt(minReview || 1))
+            .input('MinFeedback', sql.Int, parseInt(minReview || 1))
             .execute('usp_GetTopRatedCourses');
         
         res.json({
