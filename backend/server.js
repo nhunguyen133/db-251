@@ -82,7 +82,7 @@ app.get('/api/student/:studentId/courses', async (req, res) => {
                 FROM REGISTER r
                 INNER JOIN COURSE c ON r.Cour_id = c.Course_id
                 LEFT JOIN FEEDBACK f ON r.Stu_id = f.Stu_id AND r.Cour_id = f.Cour_id
-                WHERE r.Stu_id = @studentId
+                WHERE r.Stu_id = @studentId AND r.Payment_status = 'completed'
                 ORDER BY c.Cour_name
             `);
         
@@ -160,7 +160,7 @@ app.delete('/api/feedback/delete', async (req, res) => {
         await pool.request()
             .input('Stu_id', sql.Char(10), studentId)
             .input('Cour_id', sql.Char(10), courseId)
-            .execute('sp_DeleteFeedback');
+            .execute('usp_DeleteFeedback');
         
         res.json({
             success: true,
@@ -230,18 +230,13 @@ app.get('/api/student/:studentId/feedback-stats', async (req, res) => {
             .input('studentId', sql.Char(10), studentId)
             .query('SELECT AVG(CAST(Rating AS FLOAT)) AS AvgRating FROM FEEDBACK WHERE Stu_id = @studentId');
         
-        // Get pending courses count
-        const pendingResult = await pool.request()
+        // Get total courses count
+        const coursesResult = await pool.request()
             .input('studentId', sql.Char(10), studentId)
             .query(`
-                SELECT COUNT(*) AS PendingCourses
+                SELECT COUNT(*) AS TotalCourses
                 FROM REGISTER r
-                WHERE r.Stu_id = @studentId 
-                  AND r.Learning_progress >= 50
-                  AND NOT EXISTS (
-                    SELECT 1 FROM FEEDBACK f 
-                    WHERE f.Stu_id = r.Stu_id AND f.Cour_id = r.Cour_id
-                  )
+                WHERE r.Stu_id = @studentId AND Payment_status = 'completed'
             `);
         
         res.json({
@@ -249,7 +244,7 @@ app.get('/api/student/:studentId/feedback-stats', async (req, res) => {
             stats: {
                 totalFeedback: totalResult.recordset[0].TotalFeedback,
                 avgRating: avgResult.recordset[0].AvgRating || 0,
-                pendingCourses: pendingResult.recordset[0].PendingCourses
+                totalCourses: coursesResult.recordset[0].TotalCourses
             }
         });
     } catch (err) {

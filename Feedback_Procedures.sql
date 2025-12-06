@@ -133,7 +133,7 @@ GO
 -- =============================================
 -- 3. THỦ TỤC DELETE FEEDBACK
 -- =============================================
-CREATE OR ALTER PROCEDURE sp_DeleteFeedback
+CREATE OR ALTER PROCEDURE usp_DeleteFeedback
     @Stu_id  CHAR(10),
     @Cour_id CHAR(10)
 AS
