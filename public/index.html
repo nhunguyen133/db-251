@@ -36,7 +36,7 @@
                 </button>
                 <button class="menu-item" data-target="panel-student">
                     <span class="material-icons" style="font-size: 18px;">person</span>
-                    Học viên
+                    Xếp hạng
                 </button>
             </nav>
 
@@ -48,7 +48,7 @@
         <!-- Main content -->
         <main class="main">
             <header class="main-header">
-                <p>Welcome back!</p>
+                <p>Chào mừng bạn trở lại!</p>
             </header>
 
         <!-- Panel: Feedback -->
@@ -284,69 +284,609 @@
         <!-- Panel: Giảng viên -->
             <section id="panel-teacher" class="panel active">
                 <div class="panel-header">
-                    <h3>Dashboard giảng viên</h3>
+                    <h3>
+                        <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">school</span>
+                        Quản lý khóa học
+                    </h3>
                 </div>
 
+                <!-- Form tìm kiếm giảng viên -->
                 <form id="form-teacher" class="card form-inline">
                     <div class="form-group">
                         <label for="teacherId">Mã giảng viên</label>
-                        <input type="text" id="teacherId" value="U000000001" maxlength="10" required />
+                        <input type="text" id="teacherId" value="U000000009" maxlength="10" required />
                     </div>
-                    <button type="submit" class="btn-primary">Xem thống kê</button>
+                    <button type="submit" class="btn-primary">
+                        <span class="material-icons" style="font-size: 18px; vertical-align: middle;">search</span>
+                        Xem thống kê
+                    </button>
                 </form>
 
-                <!-- <div class="grid-two"> -->
-                    <!-- <div class="card">
-                        <h4>Xếp loại giảng viên</h4>
-                        <p class="small">Gọi function <code>fn_RankTeacher</code>.</p>
-                        <div id="teacher-rank" class="metric-large">—</div>
-                    </div> -->
+                <!-- Teacher Info Display -->
+                <div id="teacher-info-card" style="display: none; margin-bottom: 0.5rem;">
+                    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <span class="material-icons" style="font-size: 32px;">person</span>
+                            </div>
+                            <div>
+                                <h4 id="teacher-name-display" style="margin: 0; color: white; font-size: 1.25rem;">Tên giảng viên</h4>
+                                <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">
+                                    Mã giảng viên: <strong id="teacher-id-display">U000000009</strong>
+                                    <span id="teacher-expertise-display" style="margin-left: 1rem;"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                    <div class="card">
-                        <h4>Thống kê khóa học của giảng viên</h4>
+                <div class="grid-two">
+                    <!-- Bảng danh sách khóa học -->
+                    <div class="card" style="grid-column: 1 / -1;">
+                        <div style="display: flex; margin-top: 10px; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; gap: 1rem;">
+                            <div style="flex: 1;">
+                                <h4 style="margin-bottom: 0.75rem;  margin-top: 0;">
+                                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">list</span>
+                                    Danh sách khóa học
+                                </h4>
+                                
+                                <!-- Filters Row -->
+                                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                                    <!-- Search -->
+                                    <div style="position: relative; min-width: 250px; flex: 1;">
+                                        <span class="material-icons" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); font-size: 18px; color: #94a3b8; pointer-events: none;">search</span>
+                                        <input 
+                                            type="text" 
+                                            id="search-teacher-course" 
+                                            placeholder="Tìm kiếm khóa học..." 
+                                            style="padding: 0.5rem 1rem 0.5rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 8px; width: 100%; background-color: white; font-size: 0.875rem;"
+                                        />
+                                    </div>
+
+                                    <span style="margin-left: 20px; font-size: 0.875rem; color: #6b7280; white-space: nowrap;">Lọc theo:</span>
+                                    
+                                    <!-- Filter by Rating -->
+                                    <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                        <label style="font-size: 0.875rem; color: #6b7280; white-space: nowrap;">Rating ≥</label>
+                                        <input 
+                                            type="number" 
+                                            id="filter-rating" 
+                                            placeholder="0-5" 
+                                            min="0" 
+                                            max="5" 
+                                            step="0.1"
+                                            style="width: 80px; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 0.875rem;"
+                                        />
+                                    </div>
+                                    
+                                    <!-- Filter by Revenue -->
+                                    <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                        <label style="font-size: 0.875rem; color: #6b7280; white-space: nowrap;">Doanh thu ≥</label>
+                                        <input 
+                                            type="number" 
+                                            id="filter-revenue" 
+                                            placeholder="VNĐ" 
+                                            min="0" 
+                                            step="100000"
+                                            style="width: 120px; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 0.875rem;"
+                                        />
+                                    </div>
+                                    
+                                    <!-- Filter by Students -->
+                                    <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                        <label style="font-size: 0.875rem; color: #6b7280; white-space: nowrap;">Học viên ≥</label>
+                                        <input 
+                                            type="number" 
+                                            id="filter-students" 
+                                            placeholder="0" 
+                                            min="0" 
+                                            step="1"
+                                            style="width: 80px; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 0.875rem;"
+                                        />
+                                    </div>
+                                    
+                                    <!-- Reset button -->
+                                    <button type="button" id="btn-reset-filters" class="btn-outline" style="padding: 0.5rem 0.75rem; font-size: 0.875rem; white-space: nowrap;">
+                                        <span class="material-icons" style="font-size: 16px; vertical-align: middle;">refresh</span>
+                                        Reset
+                                    </button>
+                                </div>
+                                
+                                <!-- Filter status -->
+                                <div id="filter-status" style="margin-top: 0.75rem; font-size: 0.875rem; color: #64748b; min-height: 1.5rem;">
+                                    <!-- Filter info will be displayed here -->
+                                </div>
+                            </div>
+                            
+                            <button type="button" id="btn-add-course" class="btn-primary" style="padding: 0.5rem 1rem; white-space: nowrap;">
+                                <span class="material-icons" style="font-size: 18px; vertical-align: middle;">add</span>
+                                Thêm khóa học
+                            </button>
+                        </div>
+
                         <table class="table small" id="table-teacher-courses">
                             <thead>
                                 <tr>
-                                    <th>Mã KH</th>
-                                    <th>Tên khóa học</th>
-                                    <th>#Feedback</th>
-                                    <th>Rating TB</th>
-                                    <th>#Đăng ký</th>
-                                    <th>Điểm TB</th>
-                                    <th>Chứng chỉ</th>
-                                    <th>Doanh thu</th>
+                                    <th style="text-align: center; width: 50px;">STT</th>
+                                    <th style="min-width: 200px;">Tên khóa học</th>
+                                    <th style="text-align: center; width: 100px;">#Feedback</th>
+                                    <th style="text-align: center; width: 100px;">Rating TB</th>
+                                    <th style="text-align: center; width: 100px;">#Đăng ký</th>
+                                    <th style="text-align: center; width: 100px;">Điểm TB</th>
+                                    <th style="text-align: center; width: 150px;"><span class="material-icons" style="font-size: 24px; vertical-align: middle; padding-right: 0.25rem; color: rgb(196, 196, 38);">emoji_events</span>Chứng chỉ</th>
+                                    <th style="text-align: right; width: 150px;"><span class="material-icons" style="font-size: 24px; vertical-align: middle; padding-right: 0.25rem; color: green;">payments</span> Doanh thu</th>
+                                    <th style="text-align: center; width: 150px;">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr class="placeholder-row">
-                                    <td colspan="8">Chưa có dữ liệu. Hãy nhập mã giảng viên và bấm "Xem thống kê".</td>
+                                    <td colspan="9" style="text-align: center; padding: 2rem;">
+                                        Chưa có dữ liệu. Hãy nhập mã giảng viên và bấm "Xem thống kê".
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                <!-- </div> -->
+                </div>
             </section>
+
+            <!-- Modal Form thêm/sửa khóa học -->
+            <div id="modal-course-form" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 id="course-form-title">
+                            <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">edit</span>
+                            Thêm khóa học mới
+                        </h4>
+                        <button type="button" class="modal-close" onclick="hideModalCourseForm()">
+                            <span class="material-icons">close</span>
+                        </button>
+                    </div>
+                    
+                    <form id="form-course-edit" class="modal-body">
+                        <input type="hidden" id="edit-course-id" />
+                        <input type="hidden" id="edit-teacher-id" />
+                        
+                        <div class="form-group">
+                            <label for="edit-course-name">Tên khóa học <span style="color: red;">*</span></label>
+                            <input type="text" id="edit-course-name" required maxlength="200" placeholder="Nhập tên khóa học (tối thiểu 5 ký tự)" />
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label for="edit-course-price">Giá khóa học (VNĐ) <span style="color: red;">*</span></label>
+                                <input type="number" id="edit-course-price" required min="0" step="1000" placeholder="0" />
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit-course-date">Ngày xuất bản <span style="color: red;">*</span></label>
+                                <input type="date" id="edit-course-date" required />
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label for="edit-course-language">Ngôn ngữ <span style="color: red;">*</span></label>
+                                <select id="edit-course-language" required>
+                                    <option value="">-- Chọn ngôn ngữ --</option>
+                                    <option value="Tiếng Việt">Tiếng Việt</option>
+                                    <option value="English">English</option>
+                                    <option value="中文">中文 (Chinese)</option>
+                                    <option value="日本語">日本語 (Japanese)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit-min-avg-score">Điểm TB tối thiểu (0-10) <span style="color: red;">*</span></label>
+                                <input type="number" id="edit-min-avg-score" required min="0" max="10" step="0.1" placeholder="5.0" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit-course-description">Mô tả khóa học</label>
+                            <textarea id="edit-course-description" rows="4" maxlength="1000" placeholder="Nhập mô tả khóa học (tùy chọn)"></textarea>
+                            <small style="color: #64748b;">Tối đa 1000 ký tự</small>
+                        </div>
+
+                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+                            <button type="button" onclick="hideModalCourseForm()" class="btn-secondary">
+                                <span class="material-icons" style="font-size: 16px; vertical-align: middle;">close</span>
+                                Hủy
+                            </button>
+                            <button type="submit" class="btn-primary">
+                                <span class="material-icons" style="font-size: 16px; vertical-align: middle;">save</span>
+                                Lưu khóa học
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal: Xem chi tiết khóa học -->
+            <div id="modal-course-detail" class="modal">
+                <div class="modal-content" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="material-icons">info</span>
+                            Chi tiết khóa học
+                        </h3>
+                        <button class="modal-close" onclick="hideModalCourseDetail()">X</button>
+                    </div>
+                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                        <div id="course-detail-content" style="padding: 1rem;">
+                            <!-- Content will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Panel: Học viên -->
             <section id="panel-student" class="panel">
                 <div class="panel-header">
-                    <h3>Loyalty & Hạng thành viên học viên</h3>
-                    <p>Sử dụng function <code>fn_CalcStudentLoyaltyRank</code> trên REGISTER, COURSE, RECEIVE, FEEDBACK.</p>
+                    <h3>
+                        <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">person</span>
+                        Xếp hạng & Đánh giá
+                    </h3>
                 </div>
 
-                <form id="form-student" class="card form-inline">
-                    <div class="form-group">
-                        <label for="stuId">Mã học viên (Student_id)</label>
-                        <input type="text" id="stuId" value="U000000006" maxlength="10" required />
+                <!-- Tab Navigation -->
+                <div class="card" style="margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: none;">
+                    <div style="display: flex; gap: 0.5rem; border-bottom: 2px solid #e2e8f0;">
+                        <button type="button" class="function-tab-btn active" data-tab="teacher-ranking">
+                            <span class="material-icons" style="font-size: 20px; vertical-align: middle;">school</span>
+                            Xếp loại Giảng viên
+                        </button>
+                        <button type="button" class="function-tab-btn" data-tab="student-loyalty">
+                            <span class="material-icons" style="font-size: 20px; vertical-align: middle;">card_giftcard</span>
+                            Hạng thành viên Học viên
+                        </button>
                     </div>
-                    <button type="submit" class="btn-primary">Xem hạng thành viên</button>
-                    <span class="form-note">Ví dụ: U000000006 - U000000010 trong bảng STUDENT.</span>
-                </form>
+                </div>
 
-                <div class="card">
-                    <h4>Kết quả loyalty</h4>
-                    <p class="small">Chuỗi trả về từ function được hiển thị trực tiếp.</p>
-                    <div id="student-loyalty" class="metric-large">—</div>
+                <div style="display: block;">
+                    <!-- TAB CONTENT 1: Teacher Ranking -->
+                    <div class="function-tab-content" id="tab-teacher-ranking">
+                        <div class="card" style="border-top-left-radius: 0; border-top-right-radius: 0;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
+                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <span class="material-icons" style="color: white; font-size: 28px;">school</span>
+                            </div>
+                            
+                            <form id="form-teacher-rank" class="form-inline" style="display: flex; align-items: center; justify-content: center;">
+                                <div class="form-group" style="flex: 1; padding-left: 0.5rem;">
+                                    <label for="teacherRankId">
+                                        <span class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 4px;">badge</span>
+                                        Mã giảng viên
+                                    </label>
+                                    <input type="text" id="teacherRankId" value="U000000009" maxlength="10" required 
+                                           style="width: 100%;" placeholder="Nhập mã giảng viên" />
+                                </div>
+                                <button type="submit" class="btn-primary" style=" margin-top: 20px;">
+                                    <span class="material-icons" style="font-size: 18px; vertical-align: middle;">search</span>
+                                    Xem xếp loại
+                                </button>
+                            </form>
+                        </div>
+                        
+
+                        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%); padding: 1.5rem; border-radius: 12px; border: 2px solid #dbeafe;">
+                            <div style="text-align: center; margin-bottom: 1rem;">
+                                <span class="material-icons" style="font-size: 3rem; color: #6366f1; opacity: 0.8;">emoji_events</span>
+                            </div>
+                            <div id="teacher-rank-result" class="metric-large" style="text-align: center; font-size: 2rem; font-weight: 700; color: #6366f1; margin-bottom: 0.5rem;">
+                                —
+                            </div>
+                            <p style="text-align: center; color: #64748b; font-size: 0.875rem; margin: 0;">
+                                Xếp loại dựa trên Rating trung bình của các khóa học
+                            </p>
+                        </div>
+
+                        <div style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px; font-size: 0.875rem;">
+                            <p style="margin: 0 0 0.5rem 0; font-weight: 600; color: #1e293b;">
+                                <span class="material-icons" style="font-size: 16px; vertical-align: middle;">info</span>
+                                Thang đánh giá:
+                            </p>
+                            <div style="display: grid; gap: 0.5rem; margin-left: 1.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="display: inline-block; width: 12px; height: 12px; background: #10b981; border-radius: 50%;"></span>
+                                    <span><strong>Excellent:</strong> ≥ 4.5 điểm</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="display: inline-block; width: 12px; height: 12px; background: #3b82f6; border-radius: 50%;"></span>
+                                    <span><strong>Good:</strong> 3.5 - 4.49 điểm</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="display: inline-block; width: 12px; height: 12px; background: #f59e0b; border-radius: 50%;"></span>
+                                    <span><strong>Average:</strong> 2.5 - 3.49 điểm</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="display: inline-block; width: 12px; height: 12px; background: #ef4444; border-radius: 50%;"></span>
+                                    <span><strong>Poor:</strong> &lt; 2.5 điểm</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="display: inline-block; width: 12px; height: 12px; background: #94a3b8; border-radius: 50%;"></span>
+                                    <span><strong>New Teacher:</strong> Chưa có đánh giá</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- All Teachers Ranking Table -->
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #e2e8f0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <h4 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="material-icons" style="color: #6366f1;">leaderboard</span>
+                                    Bảng xếp loại tất cả giảng viên
+                                </h4>
+                                <button type="button" id="btn-load-all-teachers" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                    <span class="material-icons" style="font-size: 16px; vertical-align: middle;">refresh</span>
+                                    Tải danh sách
+                                </button>
+                            </div>
+
+                            <!-- Teacher Filters -->
+                            <div id="teacher-filters" style="display: none; margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                                    <!-- Search -->
+                                    <div style="position: relative; min-width: 250px; flex: 1;">
+                                        <span class="material-icons" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); font-size: 18px; color: #94a3b8; pointer-events: none;">search</span>
+                                        <input 
+                                            type="text" 
+                                            id="filter-teacher-search" 
+                                            placeholder="Tìm tên giảng viên hoặc chuyên môn..." 
+                                            style="padding: 0.5rem 1rem 0.5rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 8px; width: 100%; background-color: white; font-size: 0.875rem;"
+                                        />
+                                    </div>
+
+                                    <span style="font-size: 0.875rem; color: #6b7280; white-space: nowrap;">Lọc theo:</span>
+                                    
+                                    <!-- Filter by Rank -->
+                                    <select id="filter-teacher-rank" style="padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 0.875rem;">
+                                        <option value="">Tất cả xếp loại</option>
+                                        <option value="Excellent">Excellent (≥ 4.5)</option>
+                                        <option value="Good">Good (3.5-4.49)</option>
+                                        <option value="Average">Average (2.5-3.49)</option>
+                                        <option value="Poor">Poor (&lt; 2.5)</option>
+                                        <option value="New Teacher">New Teacher</option>
+                                    </select>
+
+                                    <!-- Filter by Courses -->
+                                    <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                        <label style="font-size: 0.875rem; color: #6b7280; white-space: nowrap;">Khóa học ≥</label>
+                                        <input 
+                                            type="number" 
+                                            id="filter-teacher-courses" 
+                                            placeholder="0" 
+                                            min="0" 
+                                            step="1"
+                                            style="width: 80px; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 0.875rem;"
+                                        />
+                                    </div>
+
+                                    <!-- Reset -->
+                                    <button type="button" id="btn-reset-teacher-filters" class="btn-outline" style="padding: 0.5rem 0.75rem; font-size: 0.875rem; white-space: nowrap;">
+                                        <span class="material-icons" style="font-size: 16px; vertical-align: middle;">refresh</span>
+                                        Reset
+                                    </button>
+                                </div>
+
+                                <!-- Filter Status -->
+                                <div id="teacher-filter-status" style="margin-top: 0.75rem; font-size: 0.875rem; color: #64748b; min-height: 1.5rem;">
+                                    <!-- Status will be displayed here -->
+                                </div>
+                            </div>
+                            
+                            <div id="all-teachers-loading" style="display: none; text-align: center; padding: 2rem; color: #94a3b8;">
+                                <span class="material-icons" style="font-size: 3rem; animation: spin 2s linear infinite;">hourglass_empty</span>
+                                <p>Đang tải danh sách giảng viên...</p>
+                            </div>
+
+                            <table class="table" id="table-all-teachers" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px; text-align: center;">STT</th>
+                                        <th style="width: 120px;">Mã GV</th>
+                                        <th>Họ và tên</th>
+                                        <th style="width: 200px;">Chuyên môn</th>
+                                        <th style="width: 100px; text-align: center;">Số khóa học</th>
+                                        <th style="width: 100px; text-align: center;">Rating TB</th>
+                                        <th style="width: 150px; text-align: center;">Xếp loại</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                                            Nhấn "Tải danh sách" để xem xếp loại tất cả giảng viên
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+                    </div>
+                    <!-- END TAB CONTENT 1 -->
+
+                    <!-- TAB CONTENT 2: Student Loyalty -->
+                    <div class="function-tab-content" id="tab-student-loyalty" style="display: none;">
+                        <div class="card" style="border-top-left-radius: 0; border-top-right-radius: 0;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
+                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <span class="material-icons" style="color: white; font-size: 28px;">card_giftcard</span>
+                            </div>
+                            
+                            <form id="form-student" class="form-inline" style="display: flex; align-items: center; justify-content: center;">
+                                <div class="form-group" style="flex: 1; padding-left: 0.5rem;">
+                                    <label for="stuId">
+                                        <span class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 4px;">person</span>
+                                        Mã học viên
+                                    </label>
+                                    <input type="text" id="stuId" value="U000000006" maxlength="10" required 
+                                           style="width: 100%;" placeholder="Nhập mã học viên" />
+                                </div>
+                                <button type="submit" class="btn-primary" style=" margin-top: 20px;">
+                                    <span class="material-icons" style="font-size: 18px; vertical-align: middle;">search</span>
+                                    Xem hạng thành viên
+                                </button>
+                            </form>
+                        </div>
+
+
+                        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 1.5rem; border-radius: 12px; border: 2px solid #fde68a;">
+                            <div style="text-align: center; margin-bottom: 1rem;">
+                                <span class="material-icons" style="font-size: 3rem; color: #f59e0b; opacity: 0.8;">workspace_premium</span>
+                            </div>
+                            <div id="student-loyalty" class="metric-large" style="text-align: center; font-size: 2rem; font-weight: 700; color: #f59e0b; margin-bottom: 0.5rem;">
+                                —
+                            </div>
+                            <p style="text-align: center; color: #92400e; font-size: 0.875rem; margin: 0;">
+                                Loyalty Points từ thanh toán & chứng chỉ
+                            </p>
+                        </div>
+
+                        <div style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px; font-size: 0.875rem;">
+                            <p style="margin: 0 0 0.5rem 0; font-weight: 600; color: #1e293b;">
+                                <span class="material-icons" style="font-size: 16px; vertical-align: middle;">info</span>
+                                Cách tính điểm:
+                            </p>
+                            <div style="display: grid; gap: 0.5rem; margin-left: 1.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="material-icons" style="font-size: 16px; color: #10b981;">payments</span>
+                                    <span>Thanh toán: 10,000 VNĐ = 1 điểm</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="material-icons" style="font-size: 16px; color: #f59e0b;">emoji_events</span>
+                                    <span>Nhận chứng chỉ: +50 điểm/chứng chỉ</span>
+                                </div>
+                            </div>
+                            <p style="margin: 0.75rem 0 0.5rem 0; font-weight: 600; color: #1e293b;">
+                                <span class="material-icons" style="font-size: 16px; vertical-align: middle;">stars</span>
+                                Hạng thành viên:
+                            </p>
+                            <div style="display: grid; gap: 0.5rem; margin-left: 1.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="display: inline-block; width: 12px; height: 12px; background: linear-gradient(135deg, #a855f7, #ec4899); border-radius: 50%;"></span>
+                                    <span><strong>Diamond:</strong> ≥ 500 điểm</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="display: inline-block; width: 12px; height: 12px; background: #f59e0b; border-radius: 50%;"></span>
+                                    <span><strong>Gold:</strong> 200 - 499 điểm</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="display: inline-block; width: 12px; height: 12px; background: #94a3b8; border-radius: 50%;"></span>
+                                    <span><strong>Silver:</strong> 100 - 199 điểm</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="display: inline-block; width: 12px; height: 12px; background: #64748b; border-radius: 50%;"></span>
+                                    <span><strong>New Member:</strong> &lt; 100 điểm</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- All Students Loyalty Ranking Table -->
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #e2e8f0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <h4 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="material-icons" style="color: #f59e0b;">leaderboard</span>
+                                    Bảng xếp hạng tất cả học viên
+                                </h4>
+                                <button type="button" id="btn-load-all-students" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                    <span class="material-icons" style="font-size: 16px; vertical-align: middle;">refresh</span>
+                                    Tải danh sách
+                                </button>
+                            </div>
+
+                            <!-- Student Filters -->
+                            <div id="student-filters" style="display: none; margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                                    <!-- Search -->
+                                    <div style="position: relative; min-width: 250px; flex: 1;">
+                                        <span class="material-icons" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); font-size: 18px; color: #94a3b8; pointer-events: none;">search</span>
+                                        <input 
+                                            type="text" 
+                                            id="filter-student-search" 
+                                            placeholder="Tìm tên học viên..." 
+                                            style="padding: 0.5rem 1rem 0.5rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 8px; width: 100%; background-color: white; font-size: 0.875rem;"
+                                        />
+                                    </div>
+
+                                    <span style="font-size: 0.875rem; color: #6b7280; white-space: nowrap;">Lọc theo:</span>
+                                    
+                                    <!-- Filter by Loyalty Rank -->
+                                    <select id="filter-student-loyalty" style="padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 0.875rem;">
+                                        <option value="">Tất cả hạng</option>
+                                        <option value="Diamond">Diamond (≥ 500)</option>
+                                        <option value="Gold">Gold (200-499)</option>
+                                        <option value="Silver">Silver (100-199)</option>
+                                        <option value="New Member">New Member (&lt; 100)</option>
+                                    </select>
+
+                                    <!-- Filter by Points -->
+                                    <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                        <label style="font-size: 0.875rem; color: #6b7280; white-space: nowrap;">Điểm ≥</label>
+                                        <input 
+                                            type="number" 
+                                            id="filter-student-points" 
+                                            placeholder="0" 
+                                            min="0" 
+                                            step="10"
+                                            style="width: 80px; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 0.875rem;"
+                                        />
+                                    </div>
+
+                                    <!-- Filter by Certificates -->
+                                    <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                        <label style="font-size: 0.875rem; color: #6b7280; white-space: nowrap;">Chứng chỉ ≥</label>
+                                        <input 
+                                            type="number" 
+                                            id="filter-student-certs" 
+                                            placeholder="0" 
+                                            min="0" 
+                                            step="1"
+                                            style="width: 80px; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 0.875rem;"
+                                        />
+                                    </div>
+
+                                    <!-- Reset -->
+                                    <button type="button" id="btn-reset-student-filters" class="btn-outline" style="padding: 0.5rem 0.75rem; font-size: 0.875rem; white-space: nowrap;">
+                                        <span class="material-icons" style="font-size: 16px; vertical-align: middle;">refresh</span>
+                                        Reset
+                                    </button>
+                                </div>
+
+                                <!-- Filter Status -->
+                                <div id="student-filter-status" style="margin-top: 0.75rem; font-size: 0.875rem; color: #64748b; min-height: 1.5rem;">
+                                    <!-- Status will be displayed here -->
+                                </div>
+                            </div>
+                            
+                            <div id="all-students-loading" style="display: none; text-align: center; padding: 2rem; color: #94a3b8;">
+                                <span class="material-icons" style="font-size: 3rem; animation: spin 2s linear infinite;">hourglass_empty</span>
+                                <p>Đang tải danh sách học viên...</p>
+                            </div>
+
+                            <table class="table" id="table-all-students" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px; text-align: center;">Hạng</th>
+                                        <th style="width: 120px;">Mã HV</th>
+                                        <th>Họ và tên</th>
+                                        <th style="width: 100px; text-align: center;">Số khóa học</th>
+                                        <th style="width: 100px; text-align: center;">Chứng chỉ</th>
+                                        <th style="width: 120px; text-align: center;">Loyalty Points</th>
+                                        <th style="width: 150px; text-align: center;">Hạng thành viên</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                                            Nhấn "Tải danh sách" để xem xếp hạng tất cả học viên
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+                    </div>
+                    <!-- END TAB CONTENT 2 -->
                 </div>
             </section>
         </main>

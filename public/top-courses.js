@@ -11,13 +11,6 @@ console.log('Panel Top Courses loaded');
 // API Base URL
 const API_BASE_TOP_COURSES = 'http://localhost:3000/api';
 
-let globalTopCourses = [];
-
-let currentSort = {
-    key: null,
-    direction: 'asc'
-}
-
 // ========================================
 // 1. KHỞI TẠO
 // ========================================
@@ -55,7 +48,7 @@ function setupTopCoursesForm() {
 // ========================================
 async function loadTopRatedCourses(publishedYear, minReview) {
     try {
-        showTableLoading('table-top-courses', 6);
+        showTableLoading('table-top-courses', 5);
         
         const response = await fetch(`${API_BASE_TOP_COURSES}/courses/top-rated?publishedYear=${publishedYear}&minReview=${minReview}`);
         const data = await response.json();
@@ -63,11 +56,6 @@ async function loadTopRatedCourses(publishedYear, minReview) {
         if (!data.success) {
             throw new Error(data.message || 'Không thể tải dữ liệu');
         }
-
-        globalTopCourses = data.data || [];
-
-        currentSort = {key: null, direction: 'asc'};
-        updateSortIcons();
         
         displayTopCourses(data.data);
         
@@ -90,26 +78,19 @@ function displayTopCourses(courses) {
     
     tbody.innerHTML = courses.map((course, index) => `
         <tr>
-            <td style="text-align: center";>${course.CourseID}</td>
+            <td>${course.Course_id}</td>
             <td>
-                <strong>${course.CourseName}</strong>
+                <strong>${course.Cour_name}</strong>
             </td>
             <td>${course['F_name + \' \' + L_name'] || course.TeacherName || '-'}</td>
             <td style="text-align: center;">
                 <span class="badge" style="background: #3b82f6; color: white; padding: 0.25rem 0.75rem; border-radius: 12px;">
-                    ${course.TotalFeedbacks} reviews
+                    ${course.Total_Reviews} reviews
                 </span>
             </td>
-
-            <td style="text-align: left; width: 100px; border-left: none; padding-left: 0;">
-                <div style="display: flex; align-items: center;">
-                    ${generateStarRating(course.AvgRating)}
-                </div>
-            </td>
-
-            <td style="text-align: center; width: 50px; border-right: none;">
-                <span style="font-weight: 700; color: #f59e0b; font-size: 1rem;">
-                    ${course.AvgRating}
+            <td style="text-align: center;">
+                <span style="color: #fbbf24; font-weight: 600; font-size: 1.1rem;">
+                    ${generateStarRating(course.Avg_Rating)} ${course.Avg_Rating}
                 </span>
             </td>
         </tr>
@@ -120,34 +101,23 @@ function displayTopCourses(courses) {
 // 5. HELPER FUNCTIONS
 // ========================================
 function generateStarRating(rating) {
-    if (rating === undefined || rating === null) return '';
+    if (!rating) return '';
+    const fullStars = Math.floor(rating);
+    const halfStar = (rating % 1) >= 0.5 ? 1 : 0;
+    const emptyStars = 5 - fullStars - halfStar;
     
-    const score = parseFloat(rating);
-    let starsHtml = '';
-
-    for (let i = 1; i <= 5; i++) {
-        if (score >= i) {
-            starsHtml += '<span class="material-icons" style="color: #fbbf24; font-size: 18px; vertical-align: middle;">star</span>';
-        } 
-        else if (score > i - 1) {
-            const percent = (score - (i - 1)) * 100;
-            
-            starsHtml += `
-            <div style="position: relative; display: inline-block; width: 18px; height: 18px; vertical-align: middle;">
-                <span class="material-icons" style="color: #e2e8f0; font-size: 18px; position: absolute; left: 0; top: 0; z-index: 1;">star_border</span>
-                
-                <div style="width: ${percent}%; height: 100%; overflow: hidden; position: absolute; left: 0; top: 0; z-index: 2;">
-                    <span class="material-icons" style="color: #fbbf24; font-size: 18px;">star</span>
-                </div>
-            </div>
-            `;
-        } 
-        else {
-            starsHtml += '<span class="material-icons" style="color: #e2e8f0; font-size: 18px; vertical-align: middle;">star_border</span>';
-        }
+    let stars = '';
+    for (let i = 0; i < fullStars; i++) {
+        stars += '<span class="material-icons" style="font-size: 18px; color: #fbbf24; vertical-align: middle;">star</span>';
     }
-
-    return starsHtml;
+    if (halfStar) {
+        stars += '<span class="material-icons" style="font-size: 18px; color: #fbbf24; vertical-align: middle;">star_half</span>';
+    }
+    for (let i = 0; i < emptyStars; i++) {
+        stars += '<span class="material-icons" style="font-size: 18px; color: #d1d5db; vertical-align: middle;">star_outline</span>';
+    }
+    
+    return stars;
 }
 
 function showTableLoading(tableId, colspan) {
@@ -177,76 +147,3 @@ function showTableError(tableId, message, colspan) {
         </tr>
     `;
 }
-
-function handleSort(key) {
-    if (globalTopCourses.length == 0) return;
-
-    if (currentSort.key == key) currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-    else {
-        currentSort.key = key;
-        currentSort.direction = 'desc';
-    }
-
-    globalTopCourses.sort((a, b) => {
-        let valA = a[key];
-        let valB = b[key];
-
-        if (valA === null || valA === undefined) valA = '';
-        if (valB === null || valB === undefined) valB = '';
-
-        const isNumber = typeof valA === 'number' && typeof valB === 'number';
-
-        if (isNumber) return currentSort.direction === 'asc' ? valA - valB : valB - valA;
-        else {
-            valA = valA.toString().toLowerCase();
-            valB = valB.toString().toLowerCase();
-            if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
-            if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
-            return 0;
-        }
-    });
-    
-    updateSortIcons();
-    displayTopCourses(globalTopCourses);
-}
-
-function updateSortIcons() {
-    // Lấy tất cả các thẻ span chứa icon (đã thêm class sort-icon ở bước trước)
-    const icons = document.querySelectorAll('.sort-icon');
-
-    icons.forEach(span => {
-        // Lấy tên cột từ ID của span
-        const key = span.id.replace('icon-', '');
-        const thElement = span.parentElement;
-
-        // Cấu hình style chung
-        span.style.verticalAlign = 'middle';
-        span.style.fontSize = '16px';
-        span.style.marginLeft = '4px';
-        span.className = 'material-icons sort-icon';
-        
-        // LOGIC HIỂN THỊ ICON
-        if (currentSort.key === key) {
-            // --- TRƯỜNG HỢP 1: CỘT ĐANG ĐƯỢC CHỌN ---
-            // Chỉ hiện mũi tên chỉ hướng (Lên hoặc Xuống)
-            span.textContent = currentSort.direction === 'asc' ? 'arrow_upward' : 'arrow_downward';
-            
-            span.style.color = '#6366f1'; 
-            span.style.opacity = '1';
-            
-            if (thElement) thElement.style.color = '#6366f1';
-
-        } else {
-            // --- TRƯỜNG HỢP 2: CỘT CHƯA ĐƯỢC CHỌN ---
-            // Hiện icon mặc định (2 mũi tên) để người dùng biết có thể bấm vào
-            span.textContent = 'unfold_more'; 
-            
-            span.style.color = '#94a3b8';
-            span.style.opacity = '0.5';
-            
-            if (thElement) thElement.style.color = '#1e293b';
-        }
-    });
-}
-
-window.handleSort = handleSort;

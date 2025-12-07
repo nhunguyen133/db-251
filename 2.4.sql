@@ -70,7 +70,7 @@ GO
 -----------------------------
 -- Test
 -----------------------------
-SELECT dbo.fn_RankTeacher('U000000001') AS RankingStatus;
+SELECT dbo.fn_RankTeacher('U000000009') AS RankingStatus;
 GO
 
 SELECT 
@@ -93,7 +93,7 @@ GO
 
 -- Sử dụng: REGISTER, COURSE, RECEIVE, FEEDBACK
 ------------------------------
-CREATE OR ALTER FUNCTION fn_CalcStudentLoyaltyRank
+CREATE OR ALTER FUNCTION dbo.fn_CalcStudentLoyaltyRank
 (
     @StuID CHAR(10)
 )
@@ -128,7 +128,7 @@ BEGIN
         IF @Cur_Status = 'completed'
         BEGIN
             -- Quy đổi tiền thành điểm: 10k VND = 1 điểm
-            SET @LoyaltyPoints = @LoyaltyPoints + CAST((@Cur_Price / 10000) AS INT);
+            SET @LoyaltyPoints = @LoyaltyPoints + CAST((@Cur_Price / 10000) AS INT); -------------------------------------
 
             -- Kiểm tra: Đã nhận chứng chỉ khóa này chưa? (Thưởng 50 điểm)
             IF EXISTS (SELECT 1 FROM [RECEIVE] WHERE Stu_id = @StuID AND Cer_id IN (SELECT Cer_id FROM CERTIFICATE WHERE Cour_id = @Cur_CourID))
