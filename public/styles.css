@@ -462,10 +462,16 @@ code {
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   z-index: 1000;
-  display: flex;
+  display: none; /* Mặc định ẩn modal */
   align-items: center;
   justify-content: center;
   animation: fadeIn 0.2s ease;
+}
+
+/* Modal hiển thị khi có class open hoặc active */
+.modal.open,
+.modal.active {
+  display: flex;
 }
 
 @keyframes fadeIn {
