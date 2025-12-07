@@ -31,6 +31,11 @@ document.querySelectorAll('.menu-item').forEach(btn => {
     if (targetPanel) {
       targetPanel.classList.add('active');
       console.log(`Switched to panel: ${target}`);
+
+      if (target === 'panel-feedback' && typeof window.loadFeedbackData === 'function') {
+        console.log('Auto-reloading feedback data...');
+        window.loadFeedbackData();
+      }
     } else {
       console.warn(`Panel not found: ${target}`);
     }
