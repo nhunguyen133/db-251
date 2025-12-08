@@ -995,3 +995,26 @@ select option {
   color: #1e293b;
   padding: 10px;
 }
+
+/* cho top-courses nen dung xoa */
+
+#table-top-courses th,
+#table-top-courses td {
+  padding-top: 12px;
+  padding-bottom: 12px; 
+  font-size: 12.35px;
+}
+
+#table-top-courses .badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+#table-top-courses .sort-icon {
+  font-size: 14px !important;
+  display: inline-block;
+  margin-left: 5px;
+  vertical-align: middle;
+  pointer-events: none;
+}

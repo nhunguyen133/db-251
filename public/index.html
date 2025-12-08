@@ -52,234 +52,233 @@
             </header>
 
         <!-- Panel: Feedback -->
-            <section id="panel-feedback" class="panel active">
-                <div class="panel-header">
-                    <h3>
-                        <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">rate_review</span>
-                        Quản lý Feedback khóa học
-                    </h3>
-                </div>
-
-                <!-- Thông tin học viên đăng nhập -->
-                <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 1.5rem;">
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            <span class="material-icons" style="font-size: 32px;">account_circle</span>
-                        </div>
-                        <div>
-                            <h4 id="student-greeting" style="margin: 0; color: white;">Xin chào, Học viên!</h4>
-                            <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Mã học viên: <strong id="current-student-id">U000000006</strong></p>
-                        </div>
-                    </div>
-                </div>
-
-                <h5 style="color: #64748b; font-size: 0.9rem; font-weight: 600; margin: 0 0 1rem 0.25rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                    Overview
-                </h5>
-            
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                    
-                    <div class="card stat-card" style="background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 100%); color: white; border: none; padding: 1rem 1.25rem; box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <div style="font-size: 2rem; font-weight: 800; line-height: 1;" id="stat-total-feedback">-</div>
-                                <div style="font-size: 0.8rem; font-weight: 600; margin-top: 0.25rem; opacity: 0.9;">Đã đánh giá</div>
-                            </div>
-                            <div style="background: rgba(255,255,255,0.25); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-                                <span class="material-icons" style="font-size: 24px;">check</span>
-                            </div>
-                        </div>
-                    </div>
-            
-                    <div class="card stat-card" style="background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); color: white; border: none; padding: 1rem 1.25rem; box-shadow: 0 4px 12px rgba(192, 132, 252, 0.3);">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <div style="font-size: 2rem; font-weight: 800; line-height: 1;" id="stat-avg-rating">-</div>
-                                <div style="font-size: 0.8rem; font-weight: 600; margin-top: 0.25rem; opacity: 0.9;">Điểm trung bình đã cho</div>
-                            </div>
-                            <div style="background: rgba(255,255,255,0.25); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-                                <span class="material-icons" style="font-size: 24px;">star</span>
-                            </div>
-                        </div>
-                    </div>
-            
-                    <div class="card stat-card" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; border: none; padding: 1rem 1.25rem; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <div style="font-size: 2rem; font-weight: 800; line-height: 1;" id="stat-total-courses">-</div>
-                                <div style="font-size: 0.8rem; font-weight: 600; margin-top: 0.25rem; opacity: 0.9;">Tổng đăng ký</div>
-                            </div>
-                            <div style="background: rgba(255,255,255,0.25); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-                                <span class="material-icons" style="font-size: 24px;">school</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card" style="border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); min-height: 400px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h6 style="margin: 0; color: #334155; font-size: 1.1rem;">
-                            <span class="material-icons" style="vertical-align: middle; margin-right: 8px; color: #6366f1;">menu_book</span>
-                            Khóa học của tôi
-                        </h6>
-
-                        <div style="display: flex; gap: 10px;">
+        <section id="panel-feedback" class="panel active">
+            <div class="panel-header">
+                <h3>
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">rate_review</span>
+                    Quản lý Feedback khóa học
+                </h3>
+            </div>
         
-                            <select id="filter-feedback-status" style="padding: 0 1rem; border: 1px solid #e2e8f0; border-radius: 8px; color: #64748b; outline: none; background: #f8fafc; cursor: pointer; font-size: 0.9rem;">
-                                <option value="all">Tất cả</option>
-                                <option value="rated">Đã đánh giá</option>
-                                <option value="unrated">Chưa đánh giá</option>
-                            </select>
-                    
-                            <div style="position: relative; width: 300px;">
-                                <span class="material-icons" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 20px;">search</span>
-                                <input type="text" id="search-my-courses" placeholder="Tìm kiếm môn học..." 
-                                       style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.2rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 0.9rem; transition: border 0.2s;">
+            <div id="fb-status" style="margin-bottom: 1rem; padding: 0.75rem; border-radius: 8px; display: none;"></div>
+        
+            <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <span class="material-icons" style="font-size: 32px;">account_circle</span>
+                    </div>
+                    <div>
+                        <h4 id="student-greeting" style="margin: 0; color: white;">Xin chào, Học viên!</h4>
+                        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Mã học viên: <strong id="current-student-id">U000000006</strong></p>
+                    </div>
+                </div>
+            </div>
+        
+            <h5 style="color: #64748b; font-size: 0.9rem; font-weight: 600; margin: 0 0 1rem 0.25rem; text-transform: uppercase;">Overview</h5>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="card stat-card" style="background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 100%); color: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 2rem; font-weight: 800; line-height: 1;" id="stat-total-feedback">-</div>
+                            <div style="font-size: 0.8rem; font-weight: 600; margin-top: 0.25rem; opacity: 0.9;">Đã đánh giá</div>
+                        </div>
+                        <span class="material-icons" style="font-size: 32px; opacity: 0.5;">check_circle</span>
+                    </div>
+                </div>
+                <div class="card stat-card" style="background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); color: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 2rem; font-weight: 800; line-height: 1;" id="stat-avg-rating">-</div>
+                            <div style="font-size: 0.8rem; font-weight: 600; margin-top: 0.25rem; opacity: 0.9;">Điểm TB đã cho</div>
+                        </div>
+                        <span class="material-icons" style="font-size: 32px; opacity: 0.5;">star</span>
+                    </div>
+                </div>
+                <div class="card stat-card" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 2rem; font-weight: 800; line-height: 1;" id="stat-pending-courses">-</div>
+                            <div style="font-size: 0.8rem; font-weight: 600; margin-top: 0.25rem; opacity: 0.9;">Tổng đăng ký</div>
+                        </div>
+                        <span class="material-icons" style="font-size: 32px; opacity: 0.5;">pending_actions</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="card" style="min-height: 400px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h6 style="margin: 0; color: #334155; font-size: 1.1rem;">
+                        <span class="material-icons" style="vertical-align: middle; margin-right: 8px; color: #6366f1;">menu_book</span>
+                        Khóa học của tôi
+                    </h6>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="filter-feedback-status" style="padding: 0 1rem; border: 1px solid #e2e8f0; border-radius: 8px; color: #64748b; outline: none; cursor: pointer;">
+                            <option value="all">Tất cả</option>
+                            <option value="rated">Đã đánh giá</option>
+                            <option value="unrated">Chưa đánh giá</option>
+                        </select>
+                        <div style="position: relative; width: 300px;">
+                            <span class="material-icons" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 20px;">search</span>
+                            <input type="text" id="search-my-courses" placeholder="Tìm kiếm môn học..." 
+                                   style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.2rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+                        </div>
+                    </div>
+                </div>
+        
+                <div id="course-list-loading" style="text-align: center; padding: 4rem; color: #94a3b8;">
+                    <span class="material-icons spin" style="font-size: 2.5rem; color: #cbd5e1;">sync</span>
+                    <p style="margin-top: 1rem;">Đang tải dữ liệu...</p>
+                </div>
+        
+                <table class="table" id="table-my-courses" style="display: none;">
+                    <thead>
+                        <tr style="color: #64748b; font-size: 0.85rem; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0;">
+                            <th style="text-align: left; padding: 12px 10px 12px 12px 1.5rem;">Tên khóa học</th>
+                            <th style="width: 15%; text-align: center;">Tiến độ</th>
+                            <th style="width: 15%; text-align: center;">Đánh giá</th>
+                            <th style="width: 15%; text-align: center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        
+            <div class="card" style="margin-top: 1.5rem;">
+                <h4 style="margin: 0 0 1rem 0; color: #334155; font-size: 1rem;">
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px; color: #6366f1;">history</span>
+                    Lịch sử đánh giá
+                </h4>
+                <table class="table" id="table-feedback-history">
+                    <thead>
+                        <tr style="color: #64748b; font-size: 0.85rem; border-bottom: 2px solid #e2e8f0;">
+                            <th style="width: 15%;">Thời gian</th>
+                            <th style="width: 30%;">Khóa học</th>
+                            <th style="width: 15%;">Đánh giá</th>
+                            <th style="width: 25%;">Nhận xét</th>
+                            <th style="width: 15%;">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        
+            <div id="feedback-modal" class="modal-overlay">
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <h3 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-icons" style="color: #6366f1;">rate_review</span>
+                            <span id="form-feedback-title">Đánh giá khóa học</span>
+                        </h3>
+                        <button type="button" class="modal-close" onclick="closeModal()">
+                            <span class="material-icons">close</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-feedback">
+                            <input type="hidden" id="fb-mode" value="add" />
+                            <input type="hidden" id="fb-stu-id" value="" />
+                            <input type="hidden" id="fb-cour-id" value="" />
+                            <input type="hidden" id="fb-rating" value="0" />
+                            
+                            <div style="background: #f8fafc; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; border: 1px solid #e2e8f0;">
+                                <div style="width: 48px; height: 48px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #6366f1;">
+                                    <span class="material-icons">school</span>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700;">Môn học</div>
+                                    <div id="fb-cour-name-display" style="font-weight: 700; color: #1e293b; font-size: 1rem;">-</div>
+                                    <div id="fb-cour-id-display" style="font-size: 0.8rem; color: #94a3b8; font-family: monospace;">-</div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-            
-                    <div id="course-list-loading" style="text-align: center; padding: 4rem; color: #94a3b8;">
-                        <span class="material-icons spin" style="font-size: 2.5rem; color: #cbd5e1;">sync</span>
-                        <p style="margin-top: 1rem;">Đang tải dữ liệu...</p>
-                    </div>
-            
-                    <table class="table" id="table-my-courses" style="display: none;">
-                        <thead>
-                            <tr style="color: #64748b; font-size: 0.85rem; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0;">
-                                <th style="text-align: left; padding: 12px 10px 12px 12px 1.5rem;">Tên khóa học</th>
-                                
-                                <th style="width: 15%; text-align: center; padding: 12px 10px;">Tiến độ</th>
-                                <th style="width: 15%; text-align: center; padding: 12px 10px;">Đánh giá</th>
-                                <th style="width: 15%; text-align: center; padding: 12px 10px;">Ngày đánh giá</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            </tbody>
-                    </table>
-                </div>
-            
-                <div id="feedback-modal" class="modal-overlay">
-                    <div class="modal-container">
-                        <div class="modal-header">
-                            <h3 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
-                                <span class="material-icons" style="color: #6366f1;">rate_review</span>
-                                <span id="form-feedback-title-text">Đánh giá khóa học</span>
-                            </h3>
-                            <button type="button" class="modal-close" onclick="closeModal()">
-                                <span class="material-icons">close</span>
-                            </button>
-                        </div>
-            
-                        <div class="modal-body">
-                            <form id="form-feedback">
-                                <input type="hidden" id="fb-mode" value="add" />
-                                <input type="hidden" id="fb-stu-id" value="U000000006" />
-                                <input type="hidden" id="fb-cour-id" value="" />
-            
-                                <div style="background: #f8fafc; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; border: 1px solid #e2e8f0;">
-                                    <div style="width: 48px; height: 48px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #6366f1; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                                        <span class="material-icons">school</span>
+        
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <label style="font-weight: 600; color: #334155; display: block; margin-bottom: 0.5rem;">Đánh giá của bạn <span style="color: #ef4444;">*</span></label>
+                                <div style="display: flex; align-items: center; justify-content: space-between; background: white; padding: 0.5rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                    <div id="rating-stars" style="display: flex; gap: 0.25rem;">
+                                        <span class="material-icons star-rating" data-rating="1" style="font-size: 36px; cursor: pointer; color: #e2e8f0;">star_border</span>
+                                        <span class="material-icons star-rating" data-rating="2" style="font-size: 36px; cursor: pointer; color: #e2e8f0;">star_border</span>
+                                        <span class="material-icons star-rating" data-rating="3" style="font-size: 36px; cursor: pointer; color: #e2e8f0;">star_border</span>
+                                        <span class="material-icons star-rating" data-rating="4" style="font-size: 36px; cursor: pointer; color: #e2e8f0;">star_border</span>
+                                        <span class="material-icons star-rating" data-rating="5" style="font-size: 36px; cursor: pointer; color: #e2e8f0;">star_border</span>
                                     </div>
-                                    <div>
-                                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Môn học</div>
-                                        <div id="fb-cour-name-display" style="font-weight: 700; color: #1e293b; font-size: 1rem; margin-top: 2px;">-</div>
-                                        <div id="fb-cour-id-display" style="font-size: 0.8rem; color: #94a3b8; font-family: monospace;">-</div>
-                                    </div>
+                                    <span id="rating-text" style="font-weight: 600; color: #6366f1; font-size: 0.9rem; background: #e0e7ff; padding: 4px 10px; border-radius: 20px;">Chưa chọn</span>
                                 </div>
-            
-                                <div class="form-group" style="margin-bottom: 1.5rem;">
-                                    <label style="font-weight: 600; color: #334155; margin-bottom: 0.75rem; display: block;">Đánh giá của bạn <span style="color: #ef4444;">*</span></label>
-                                    <div style="display: flex; align-items: center; justify-content: space-between; background: white; padding: 0.5rem; border-radius: 8px;">
-                                        <div id="rating-stars" style="display: flex; gap: 0.25rem;">
-                                            <span class="material-icons star-rating" data-rating="1" style="font-size: 36px; cursor: pointer; color: #e2e8f0; transition: 0.2s;">star_border</span>
-                                            <span class="material-icons star-rating" data-rating="2" style="font-size: 36px; cursor: pointer; color: #e2e8f0; transition: 0.2s;">star_border</span>
-                                            <span class="material-icons star-rating" data-rating="3" style="font-size: 36px; cursor: pointer; color: #e2e8f0; transition: 0.2s;">star_border</span>
-                                            <span class="material-icons star-rating" data-rating="4" style="font-size: 36px; cursor: pointer; color: #e2e8f0; transition: 0.2s;">star_border</span>
-                                            <span class="material-icons star-rating" data-rating="5" style="font-size: 36px; cursor: pointer; color: #e2e8f0; transition: 0.2s;">star_border</span>
-                                        </div>
-                                        <span id="rating-text" style="font-weight: 600; color: #6366f1; font-size: 0.9rem; background: #e0e7ff; padding: 4px 10px; border-radius: 20px;">Chưa chọn</span>
-                                    </div>
-                                    <input type="hidden" id="fb-rating" value="0" required />
-                                </div>
-            
-                                <div class="form-group" style="margin-bottom: 0.5rem;">
-                                    <label for="fb-comment" style="font-weight: 600; color: #334155; margin-bottom: 0.5rem; display: block;">Nhận xét chi tiết <span style="color: #ef4444;">*</span></label>
-                                    <textarea id="fb-comment" rows="4" 
-                                              placeholder="Chia sẻ trải nghiệm của bạn (tối thiểu 20 ký tự)..."
-                                              style="width: 100%; padding: 0.85rem; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.9rem; resize: vertical; transition: all 0.2s;"
-                                              required></textarea>
-                                    <p style="margin-top: 0.5rem; color: #94a3b8; font-size: 0.85rem; text-align: right;">
-                                        <span id="char-count">0</span>/3000
-                                    </p>
-                                </div>
-            
-                                <div style="display: flex; gap: 1rem; border-top: 1px solid #e2e8f0; padding-top: 1.5rem;">
-                                    <button type="button" id="btn-delete-fb" class="btn-danger" style="flex: 1; padding: 0.75rem; justify-content: center; display: none;">
-                                        <span class="material-icons" style="font-size: 18px; margin-right: 4px;">delete</span> Xóa
-                                    </button>
-            
-                                    <button type="submit" id="btn-submit-fb" class="btn-primary" style="flex: 1; padding: 0.75rem; justify-content: center;">
-                                        <span class="material-icons" style="font-size: 18px; margin-right: 4px;">save</span> Lưu đánh giá
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+        
+                            <div class="form-group" style="margin-bottom: 0.5rem;">
+                                <label style="font-weight: 600; color: #334155; display: block; margin-bottom: 0.5rem;">Nhận xét chi tiết <span style="color: #ef4444;">*</span></label>
+                                <textarea id="fb-comment" rows="4" placeholder="Nhập ít nhất 20 ký tự..." style="width: 100%; padding: 0.85rem; border: 2px solid #e2e8f0; border-radius: 12px;"></textarea>
+                                <p style="margin-top: 0.5rem; color: #94a3b8; font-size: 0.85rem; text-align: right;"><span id="char-count">0</span>/3000</p>
+                            </div>
+        
+                            <div style="display: flex; gap: 1rem; border-top: 1px solid #e2e8f0; padding-top: 1.5rem; margin-top: 1rem;">
+                                <button type="button" id="btn-delete-fb" class="btn-danger" style="flex: 1; justify-content: center; display: none;">Xóa</button>
+                                <button type="submit" id="btn-submit-fb" class="btn-primary" style="flex: 1; justify-content: center;">Lưu đánh giá</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            </section>            
-            
-        <!-- Panel: Top khóa học -->
-            <section id="panel-top-courses" class="panel">
-                <div class="panel-header">
-                    <h3>Top khóa học theo Rating</h3>
-                </div>
-
-                <form id="form-top-courses" class="card form-inline">
-                    <div class="form-group">
+            </div>
+        </section>
+        
+        <section id="panel-top-courses" class="panel">
+            <div class="panel-header">
+                <h3>Top khóa học theo Rating</h3>
+            </div>
+        
+            <form id="form-top-courses" class="card form-inline">
+                <div class="form-group">
                     <label for="year">Năm xuất bản</label>
                     <input type="number" id="year" name="year" value="2024" required />
-                    </div>
-                    <div class="form-group">
+                </div>
+                <div class="form-group">
                     <label for="minReview">Số lượt đánh giá tối thiểu</label>
                     <input type="number" id="minReview" name="minReview" value="2" min="1" required />
-                    </div>
-                    <button type="submit" class="btn-primary">Xem thống kê</button>
-                </form>
-
-                <div class="card">
-                    <table class="table" id="table-top-courses">
+                </div>
+                <button type="submit" class="btn-primary">Xem thống kê</button>
+            </form>
+        
+            <div class="card">
+                <table class="table" id="table-top-courses" style="width: 100%; table-layout: fixed;">
                     <thead>
-                    <tr>
-                        <th onclick="handleSort('CourseID')" style="text-align: center; cursor: pointer; user-select: none;">
-                            Mã khóa học <span id="icon-CourseID" class="sort-icon"></span>
-                        </th>
-                        
-                        <th onclick="handleSort('CourseName')" style="text-align: center; cursor: pointer; user-select: none;">
-                            Tên khóa học <span id="icon-CourseName" class="sort-icon"></span>
-                        </th>
-                        
-                        <th onclick="handleSort('TeacherName')" style="cursor: pointer; user-select: none;">
-                            Giảng viên <span id="icon-TeacherName" class="sort-icon"></span>
-                        </th>
-                
-                        <th onclick="handleSort('TotalFeedbacks')" style="text-align: center; cursor: pointer; user-select: none;">
-                            Số lượt đánh giá <span id="icon-TotalFeedbacks" class="sort-icon"></span>
-                        </th>
-                
-                        <th colspan="2" onclick="handleSort('AvgRating')" style="text-align: center; cursor: pointer; user-select: none;">
-                            Điểm trung bình <span id="icon-AvgRating" class="sort-icon"></span>
-                        </th>
-                    </tr>
+                        <tr style="font-size: 13px; color: #334155;">
+                            
+                            <th onclick="handleSortTopCourses('CourseID')" style="text-align: center; cursor: pointer; user-select: none; width: 17%;">
+                                Mã khóa học 
+                                <span id="icon-CourseID" class="sort-icon material-icons">unfold_more</span>
+                            </th>
+                            
+                            <th onclick="handleSortTopCourses('CourseName')" style="text-align: left; cursor: pointer; user-select: none; width: 38%; padding-left: 1rem;">
+                                Tên khóa học 
+                                <span id="icon-CourseName" class="sort-icon material-icons">unfold_more</span>
+                            </th>
+                            
+                            <th onclick="handleSortTopCourses('TeacherName')" style="text-align: left; cursor: pointer; user-select: none; width: 15%;">
+                                Giảng viên 
+                                <span id="icon-TeacherName" class="sort-icon material-icons">unfold_more</span>
+                            </th>
+                    
+                            <th onclick="handleSortTopCourses('TotalFeedbacks')" style="text-align: center; cursor: pointer; user-select: none; width: 15%;">
+                                Số lượt đánh giá 
+                                <span id="icon-TotalFeedbacks" class="sort-icon material-icons">unfold_more</span>
+                            </th>
+                    
+                            <th colspan="2" onclick="handleSortTopCourses('AvgRating')" style="text-align: center; cursor: pointer; user-select: none; width: 15%;">
+                                Điểm trung bình 
+                                <span id="icon-AvgRating" class="sort-icon material-icons">unfold_more</span>
+                            </th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr class="placeholder-row">
-                        <td colspan="5">Nhấn "Xem thống kê" để tải dữ liệu từ backend.</td>
-                    </tr>
+                        <tr class="placeholder-row">
+                            <td colspan="6" style="padding: 3rem; text-align: center; color: #64748b;">
+                                Nhấn "Xem thống kê" để tải dữ liệu từ backend.
+                            </td>
+                        </tr>
                     </tbody>
-                    </table>
-                </div>
-            </section>
+                </table>
+            </div>
+        </section>
 
         <!-- Panel: Giảng viên -->
             <section id="panel-teacher" class="panel">
