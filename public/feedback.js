@@ -6,12 +6,11 @@
 const API_BASE_URL = 'http://localhost:3000/api';
 
 // Current Student ID (hardcoded for demo)
-const CURRENT_STUDENT_ID = 'U000000007';
+const CURRENT_STUDENT_ID = 'U000000003';
 
 // Global state
 let currentCourses = [];
-let currentFeedbackHistory = [];
-let selectedCourse = null;
+const feedbackModal = document.getElementById('feedback-modal');
 
 // ========================================
 // 1. KHỞI TẠO KHI TRANG LOAD
@@ -20,8 +19,10 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Feedback Management initialized');
     
     // Set student ID
-    document.getElementById('current-student-id').textContent = CURRENT_STUDENT_ID;
-    document.getElementById('fb-stu-id').value = CURRENT_STUDENT_ID;
+    const stuIdEl = document.getElementById('current-student-id');
+    const fbStuIdEl = document.getElementById('fb-stu-id');
+    if(stuIdEl) stuIdEl.textContent = CURRENT_STUDENT_ID;
+    if(fbStuIdEl) fbStuIdEl.value = CURRENT_STUDENT_ID;
     
     // Load student info (name)
     loadStudentInfo();
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load initial data (chỉ khi panel feedback được active)
     const feedbackPanel = document.getElementById('panel-feedback');
-    if (feedbackPanel.classList.contains('active')) {
+    if (feedbackPanel && feedbackPanel.classList.contains('active')) {
         loadFeedbackData();
     }
 });
@@ -46,6 +47,12 @@ function setupEventListeners() {
         searchInput.addEventListener('input', filterCourses);
     }
     
+    const filterSelect = document.getElementById('filter-feedback-status');
+    if (filterSelect) {
+        filterSelect.addEventListener('change', filterCourses);
+        filterSelect.addEventListener('change', updateFilterColor);
+    }
+
     // Star rating - hover and click
     const stars = document.querySelectorAll('.star-rating');
     stars.forEach((star, index) => {
@@ -80,22 +87,10 @@ function setupEventListeners() {
         commentTextarea.addEventListener('input', updateCharCount);
     }
     
-    // Course combobox - change event
-    const courseSelect = document.getElementById('fb-course-select');
-    if (courseSelect) {
-        courseSelect.addEventListener('change', handleCourseSelectChange);
-    }
-    
     // Form submit
     const feedbackForm = document.getElementById('form-feedback');
     if (feedbackForm) {
         feedbackForm.addEventListener('submit', handleFormSubmit);
-    }
-    
-    // Cancel button
-    const cancelBtn = document.getElementById('btn-cancel-fb');
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', resetForm);
     }
     
     // Delete button
@@ -103,13 +98,19 @@ function setupEventListeners() {
     if (deleteBtn) {
         deleteBtn.addEventListener('click', handleDeleteFeedback);
     }
+
+    // Modal Close Logic (Click outside)
+    window.onclick = function(event) {
+        if (event.target === feedbackModal) {
+            closeModal();
+        }
+    }
 }
 
 // ========================================
 // 3. LOAD DỮ LIỆU BAN ĐẦU
 // ========================================
 
-// Load thông tin học viên
 async function loadStudentInfo() {
     try {
         const response = await fetch(`${API_BASE_URL}/student/${CURRENT_STUDENT_ID}/info`);
@@ -121,32 +122,22 @@ async function loadStudentInfo() {
             if (greetingElement) {
                 greetingElement.textContent = `Xin chào, ${studentName}!`;
             }
-        } else {
-            console.warn('Không tìm thấy thông tin học viên');
         }
     } catch (error) {
         console.error('Lỗi khi load thông tin học viên:', error);
-        // Không hiển thị lỗi cho user, giữ nguyên "Học viên!"
     }
 }
 
 async function loadFeedbackData() {
     try {
-        showStatus('Đang tải dữ liệu...', 'info');
-        
         // Load danh sách khóa học
         await loadMyCourses();
-        
-        // Load lịch sử feedback
-        await loadFeedbackHistory();
         
         // Load thống kê
         await loadFeedbackStats();
         
-        showStatus('Tải dữ liệu thành công!', 'success');
     } catch (error) {
         console.error('Error loading data:', error);
-        showStatus('Lỗi khi tải dữ liệu: ' + error.message, 'error');
     }
 }
 
@@ -155,12 +146,15 @@ async function loadFeedbackData() {
 // ========================================
 async function loadMyCourses() {
     try {
-        // TODO: Gọi API GET /api/student/:studentId/courses
+        const loadingEl = document.getElementById('course-list-loading');
+        const tableEl = document.getElementById('table-my-courses');
+        
+        if(loadingEl) loadingEl.style.display = 'block';
+        if(tableEl) tableEl.style.display = 'none';
+
         const response = await fetch(`${API_BASE_URL}/student/${CURRENT_STUDENT_ID}/courses`);
         
-        if (!response.ok) {
-            throw new Error('Không thể tải danh sách khóa học');
-        }
+        if (!response.ok) throw new Error('Không thể tải danh sách khóa học');
         
         const data = await response.json();
         currentCourses = data.data || [];
@@ -168,293 +162,192 @@ async function loadMyCourses() {
         // Render table
         renderCoursesTable(currentCourses);
         
-        // Hide loading, show table
-        document.getElementById('course-list-loading').style.display = 'none';
-        document.getElementById('table-my-courses').style.display = 'table';
+        if(loadingEl) loadingEl.style.display = 'none';
+        if(tableEl) tableEl.style.display = 'table';
         
     } catch (error) {
         console.error('Error loading courses:', error);
-        document.getElementById('course-list-loading').innerHTML = `
-            <div style="text-align: center; padding: 2rem; color: #ef4444;">
-                <div style="font-size: 2rem;">X</div>
-                <p>Không thể tải danh sách khóa học</p>
-                <p style="font-size: 0.9rem;">${error.message}</p>
-                <button onclick="loadMyCourses()" class="btn-primary" style="margin-top: 1rem;">
-                    Thử lại
-                </button>
-            </div>
-        `;
+        const loadingEl = document.getElementById('course-list-loading');
+        if(loadingEl) {
+            loadingEl.innerHTML = `<p style="color: #ef4444;">Lỗi: ${error.message}</p>`;
+        }
     }
 }
 
 // ========================================
-// 5. RENDER BẢNG KHÓA HỌC
+// 5. RENDER BẢNG KHÓA HỌC (GIAO DIỆN MỚI)
 // ========================================
 function renderCoursesTable(courses) {
     const tbody = document.querySelector('#table-my-courses tbody');
-    
+    if (!tbody) return;
+
     if (!courses || courses.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8;">
-                    Không có khóa học nào đã đăng ký.
-                </td>
-            </tr>
-        `;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 2rem; color: #94a3b8;">Không có khóa học nào.</td></tr>`;
         return;
     }
     
-    // Populate combobox với danh sách khóa học
-    populateCourseCombobox(courses);
-    
     tbody.innerHTML = courses.map(course => {
         const rating = course.rating || course.Rating;
-        const status = course.status || course.Status || '';
-        const daysAgo = course.daysAgo || course.DaysAgo;
+        const progress = course.progress || course.Learning_progress;
         
-        // Hiển thị rating hoặc "Chưa đánh giá"
+        // Hiển thị ngày đánh giá
+        let dateDisplay = '<span style="color: #94a3b8; font-style: italic; font-size: 0.85rem;">-</span>';
+        if (course.dateRated || course.Date_rat) {
+            dateDisplay = formatDate(course.dateRated || course.Date_rat);
+        }
+
+        // Hiển thị Rating
         const ratingDisplay = rating ? 
             generateStarDisplay(rating) : 
-            '<span style="color: #9ca3af; font-style: italic;">Chưa đánh giá</span>';
-        
-        // Xác định nút hiển thị
-        let actionButtons = '';
-        if (rating) {
-            // Đã đánh giá → Hiển thị nút Sửa và Xóa
-            const canEdit = daysAgo <= 30;
-            actionButtons = `
-                <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
-                    <button class="btn-outline" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; ${!canEdit ? 'opacity: 0.5; cursor: not-allowed;' : ''}" 
-                            onclick='editFeedback(${JSON.stringify(course)})' ${!canEdit ? 'disabled' : ''}>
-                        <span class="material-icons" style="font-size: 14px; vertical-align: middle;">edit</span>
-                        Sửa
-                    </button>
-                    <button class="btn-danger" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; ${!canEdit ? 'opacity: 0.5; cursor: not-allowed;' : ''}" 
-                            onclick='handleDeleteFeedback("${course.courseId || course.Cour_id}")' ${!canEdit ? 'disabled' : ''}>
-                        <span class="material-icons" style="font-size: 14px; vertical-align: middle;">delete</span>
-                        Xóa
-                    </button>
-                </div>
-                ${!canEdit ? '<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem; display: inline-flex; align-items: center; gap: 0.25rem;"><span class="material-icons" style="font-size: 14px;">lock</span> Quá 30 ngày</div>' : ''}
-            `;
-        } else {
-            // Chưa đánh giá → Hiển thị nút Thêm
-            actionButtons = `
-                <button class="btn-primary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;"
-                        onclick='addNewFeedback(${JSON.stringify(course)})'>
-                    <span class="material-icons" style="font-size: 14px; vertical-align: middle;">add</span>
-                    Thêm
-                </button>
-            `;
-        }
+            '<span style="color: #94a3b8; font-style: italic; font-size: 0.85rem;">-</span>';
+
+        // Escape JSON để truyền vào hàm onclick an toàn
+        const courseJson = JSON.stringify(course).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
         
         return `
-            <tr style="${!rating ? 'background: #fefce8;' : ''}">
-                <!-- <td><strong>${course.courseId || course.Cour_id}</strong></td> -->
+            <tr class="course-row" onclick='handleCourseRowClick(this, ${courseJson})' style="cursor: pointer; transition: background 0.2s;">
                 <td>
-                    <strong>${course.courseName || course.Cour_name}</strong>
+                    <div style="font-weight: 600; color: #1e293b;">${course.courseName || course.Cour_name}</div>
                 </td>
                 <td>
-                    <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                        <span style="color: ${(course.progress || course.Learning_progress) >= 100 ? '#16a34a' : '#f59e0b'}; font-weight: 600;">
-                            ${course.progress || course.Learning_progress}%
-                        </span>
-                        <div style="width: 100%; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden;">
-                            <div style="width: ${course.progress || course.Learning_progress}%; height: 100%; background: ${(course.progress || course.Learning_progress) >= 100 ? '#16a34a' : '#f59e0b'}; transition: width 0.3s;"></div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="color: ${progress >= 100 ? '#10b981' : '#f59e0b'}; font-weight: 600; font-size: 0.85rem;">${progress}%</span>
+                        <div style="flex: 1; height: 4px; background: #e2e8f0; border-radius: 2px; max-width: 60px;">
+                            <div style="width: ${progress}%; height: 100%; background: ${progress >= 100 ? '#10b981' : '#f59e0b'}; border-radius: 2px;"></div>
                         </div>
                     </div>
                 </td>
-                <td>${ratingDisplay}</td>
-                <td>${actionButtons}</td>
+                <td style="text-align: center; vertical-align: middle; padding: 12px 10px;">
+                    ${ratingDisplay}
+                </td>
+                <td style="text-align: center; vertical-align: middle; color: #64748b; font-size: 0.85rem; padding: 12px 10px;">
+                    ${dateDisplay}
+                </td>
             </tr>
         `;
     }).join('');
 }
 
-// Helper function to generate star display
-function generateStarDisplay(rating) {
-    const fullStars = Math.floor(rating);
-    let starsHtml = '';
-    
-    for (let i = 1; i <= 5; i++) {
-        if (i <= fullStars) {
-            starsHtml += '<span class="material-icons" style="font-size: 16px; color: #fbbf24; vertical-align: middle;">star</span>';
-        } else {
-            starsHtml += '<span class="material-icons" style="font-size: 16px; color: #e5e7eb; vertical-align: middle;">star_border</span>';
-        }
-    }
-    
-    return `<span style="white-space: nowrap;">${starsHtml} <span style="font-weight: 600; color: #f59e0b;">${rating}</span></span>`;
-}
+// Helper: Highlight dòng và Mở Popup
+function handleCourseRowClick(rowElement, course) {
+    const rating = course.rating || course.Rating;
+    const progress = course.progress || course.Learning_progress || 0;
 
-// ========================================
-// 5B. POPULATE COURSE COMBOBOX
-// ========================================
-function populateCourseCombobox(courses) {
-    const select = document.getElementById('fb-course-select');
-    if (!select) return;
-    
-    // Lưu lại giá trị đang chọn (nếu có)
-    const currentValue = select.value;
-    
-    // Xóa tất cả options cũ trừ option đầu tiên
-    select.innerHTML = '<option value="">-- Chọn khóa học để đánh giá --</option>';
-    
-    // Thêm tất cả khóa học vào combobox
-    courses.forEach(course => {
-        const option = document.createElement('option');
-        option.value = course.courseId || course.Cour_id;
-        option.textContent = course.courseName || course.Cour_name;
-        
-        // Lưu thêm thông tin vào dataset để dùng sau
-        option.dataset.courseData = JSON.stringify(course);
-        
-        select.appendChild(option);
-    });
-    
-    // Khôi phục giá trị đã chọn (nếu có)
-    if (currentValue) {
-        select.value = currentValue;
-    }
-}
-
-// ========================================
-// 6. FILTER / SEARCH KHÓA HỌC
-// ========================================
-function filterCourses() {
-    const searchTerm = document.getElementById('search-my-courses').value.toLowerCase();
-    
-    const filteredCourses = currentCourses.filter(course => {
-        const courseId = (course.courseId || course.Cour_id || '').toLowerCase();
-        const courseName = (course.courseName || course.Course_name || '').toLowerCase();
-        return courseId.includes(searchTerm) || courseName.includes(searchTerm);
-    });
-    
-    renderCoursesTable(filteredCourses);
-}
-
-// ========================================
-// 6B. HANDLE COURSE COMBOBOX CHANGE
-// ========================================
-function handleCourseSelectChange(event) {
-    const selectedOption = event.target.options[event.target.selectedIndex];
-    const courseId = event.target.value;
-    
-    if (!courseId) {
-        // Không chọn khóa học nào
-        document.getElementById('fb-cour-id').value = '';
-        document.getElementById('fb-cour-id-display').textContent = '-';
-        resetForm();
-        showStatus('Vui lòng chọn khóa học để bắt đầu đánh giá.', 'info');
+    // Nếu chưa đánh giá (rating = 0 hoặc null) MÀ tiến độ < 50% thì báo lỗi và DỪNG LUÔN.
+    if ((!rating || rating === 0) && progress < 50) {
+        alert(`Bạn cần hoàn thành ít nhất 50% khóa học để viết đánh giá.\n(Tiến độ hiện tại: ${progress}%)`);
         return;
     }
-    
-    // Lấy thông tin khóa học từ dataset
-    const courseData = JSON.parse(selectedOption.dataset.courseData);
-    
-    // Cập nhật hidden input và display
-    document.getElementById('fb-cour-id').value = courseId;
-    document.getElementById('fb-cour-id-display').textContent = courseId;
-    
-    // Kiểm tra xem đã đánh giá chưa
-    if (courseData.rating) {
-        // Đã đánh giá → Load form ở chế độ sửa
-        editFeedback(courseData);
-    } else {
-        // Chưa đánh giá → Load form ở chế độ thêm mới
-        addNewFeedback(courseData);
-    }
-}
 
-// ========================================
-// 7. THÊM FEEDBACK MỚI
-// ========================================
-function addNewFeedback(course) {
-    selectedCourse = course;
-    
-    // Reset form
-    resetForm();
-    
-    // Set mode to 'add'
-    document.getElementById('fb-mode').value = 'add';
-    const titleIcon = '<span class="material-icons" style="vertical-align: middle; margin-right: 8px;">add_circle</span>';
-    document.getElementById('form-feedback-title').innerHTML = titleIcon + 'Thêm đánh giá mới';
-    
-    // Fill course info
+    // 1. Highlight UI
+    document.querySelectorAll('.course-row').forEach(row => row.style.backgroundColor = '');
+    if(rowElement) rowElement.style.backgroundColor = '#f1f5f9';
+
+    // 2. Điền dữ liệu vào Form Popup
     const courseId = course.courseId || course.Cour_id;
     const courseName = course.courseName || course.Cour_name;
-    
-    // Update combobox selection
-    const courseSelect = document.getElementById('fb-course-select');
-    if (courseSelect) {
-        courseSelect.value = courseId;
-    }
-    
-    // Update hidden field and display
-    document.getElementById('fb-cour-id').value = courseId;
-    document.getElementById('fb-cour-id-display').textContent = courseId;
-    
-    // Hide delete button
-    document.getElementById('btn-delete-fb').style.display = 'none';
-    
-    // Update status
-    showStatus('Vui lòng nhập đánh giá và nhận xét của bạn.', 'info');
-    
-    // Scroll to form
-    document.getElementById('form-feedback').scrollIntoView({ behavior: 'smooth' });
-}
-
-// ========================================
-// 8. SỬA FEEDBACK ĐÃ CÓ
-// ========================================
-function editFeedback(course) {
-    selectedCourse = course;
-    
-    // Set mode to 'edit'
-    document.getElementById('fb-mode').value = 'edit';
-    const titleIcon = '<span class="material-icons" style="vertical-align: middle; margin-right: 8px;">edit</span>';
-    document.getElementById('form-feedback-title').innerHTML = titleIcon + 'Chỉnh sửa đánh giá';
-    
-    // Fill course info
-    const courseId = course.courseId || course.Cour_id;
-    const courseName = course.courseName || course.Cour_name;
-    const rating = course.rating || course.Rating;
     const comment = course.comment || course.Comment;
-    
-    // Update combobox selection
-    const courseSelect = document.getElementById('fb-course-select');
-    if (courseSelect) {
-        courseSelect.value = courseId;
-    }
-    
-    // Update hidden field and display
+    const daysAgo = course.daysAgo || course.DaysAgo || 0;
+
+    // Reset form trước khi điền
+    resetForm();
+
+    // Điền thông tin tĩnh (Mã & Tên môn)
     document.getElementById('fb-cour-id').value = courseId;
-    document.getElementById('fb-cour-id-display').textContent = courseId;
-    
-    // Set rating
-    selectRating(rating);
-    
-    // Set comment
-    document.getElementById('fb-comment').value = comment || '';
-    updateCharCount();
-    
-    // Show delete button if within 30 days
-    const status = course.status || course.Status || '';
-    if (status.includes('Có thể sửa') || course.daysAgo <= 30) {
-        document.getElementById('btn-delete-fb').style.display = 'block';
+    const idDisplay = document.getElementById('fb-cour-id-display');
+    const nameDisplay = document.getElementById('fb-cour-name-display');
+    if(idDisplay) idDisplay.textContent = courseId;
+    if(nameDisplay) nameDisplay.textContent = courseName;
+
+    // Các element cần thao tác
+    const deleteBtn = document.getElementById('btn-delete-fb');
+    const submitBtn = document.getElementById('btn-submit-fb');
+    const commentInput = document.getElementById('fb-comment');
+    const ratingContainer = document.getElementById('rating-stars');
+    const titleText = document.getElementById('form-feedback-title-text');
+
+    // Mặc định cho phép sửa
+    let isEditable = true;
+
+    // 3. Logic Add/Edit
+    if (rating) {
+        // Chế độ EDIT
+        document.getElementById('fb-mode').value = 'edit';
+        // document.getElementById('form-feedback-title-text').textContent = 'Chỉnh sửa đánh giá';
+        
+        selectRating(rating);
+        commentInput.value = comment || '';
+        updateCharCount();
+
+        // Kiểm tra thời gian
+        if (daysAgo > 30) {
+            // Quá hạn
+            isEditable = false;
+            titleText.textContent = 'Chi tiết đánh giá (Chỉ xem)';
+            
+            // Ẩn nút Xóa và nút Lưu
+            deleteBtn.style.display = 'none';
+            submitBtn.style.display = 'none';
+
+            // Disable nhập liệu
+            commentInput.disabled = true;
+            ratingContainer.style.pointerEvents = 'none'; // Không cho click sao
+            ratingContainer.style.opacity = '0.7';
+        } else {
+            // Còn hạn
+            isEditable = true;
+            titleText.textContent = 'Chỉnh sửa đánh giá';
+            
+            deleteBtn.style.display = 'inline-flex';
+            submitBtn.style.display = 'inline-flex';
+            submitBtn.innerHTML = '<span class="material-icons" style="font-size: 18px; margin-right: 4px;">save</span> Cập nhật';
+
+            commentInput.disabled = false;
+            ratingContainer.style.pointerEvents = 'auto';
+            ratingContainer.style.opacity = '1';
+        }
     } else {
-        document.getElementById('btn-delete-fb').style.display = 'none';
+        // Thêm đánh giá
+        isEditable = true;
+        document.getElementById('fb-mode').value = 'add';
+        titleText.textContent = 'Thêm đánh giá';
+        
+        deleteBtn.style.display = 'none';
+        submitBtn.style.display = 'inline-flex';
+        submitBtn.innerHTML = '<span class="material-icons" style="font-size: 18px; margin-right: 4px;">save</span> Lưu đánh giá';
+        
+        commentInput.disabled = false;
+        ratingContainer.style.pointerEvents = 'auto';
+        ratingContainer.style.opacity = '1';
     }
-    
-    // Update status
-    showStatus('Bạn đang chỉnh sửa đánh giá đã có. Lưu ý: chỉ sửa được trong vòng 30 ngày.', 'warning');
-    
-    // Scroll to form
-    document.getElementById('form-feedback').scrollIntoView({ behavior: 'smooth' });
+
+    // 4. Mở Popup
+    openModal();
 }
 
 // ========================================
-// 9. HIGHLIGHT STARS (for hover effect)
+// 6. POPUP / MODAL FUNCTIONS
+// ========================================
+function openModal() {
+    if(feedbackModal) feedbackModal.classList.add('open');
+}
+
+function closeModal() {
+    if(feedbackModal) feedbackModal.classList.remove('open');
+    // Bỏ highlight dòng khi đóng
+    document.querySelectorAll('.course-row').forEach(row => row.style.backgroundColor = '');
+}
+
+function resetForm() {
+    document.getElementById('fb-mode').value = 'add';
+    document.getElementById('fb-comment').value = '';
+    selectRating(0);
+    updateCharCount();
+    document.getElementById('btn-delete-fb').style.display = 'none';
+}
+
+// ========================================
+// 7. CÁC HÀM XỬ LÝ FORM (SUBMIT, RATING...)
 // ========================================
 function highlightStars(rating, filled) {
     const stars = document.querySelectorAll('.star-rating');
@@ -469,394 +362,168 @@ function highlightStars(rating, filled) {
     });
 }
 
-// ========================================
-// 10. SELECT RATING
-// ========================================
 function selectRating(rating) {
-    // Update hidden input
     document.getElementById('fb-rating').value = rating;
-    
-    // Update stars
     highlightStars(rating, true);
     
-    // Update text
     const ratingTexts = {
-        1: 'Rất không hài lòng',
-        2: 'Không hài lòng',
-        3: 'Bình thường',
-        4: 'Hài lòng',
-        5: 'Rất hài lòng'
+        1: 'Rất không hài lòng', 2: 'Không hài lòng', 3: 'Bình thường', 4: 'Hài lòng', 5: 'Rất hài lòng'
     };
-    
-    document.getElementById('rating-text').textContent = rating > 0 ? ratingTexts[rating] : 'Chưa chọn đánh giá';
+    const textEl = document.getElementById('rating-text');
+    if(textEl) textEl.textContent = rating > 0 ? ratingTexts[rating] : 'Chưa chọn';
 }
 
-// ========================================
-// 10. CẬP NHẬT SỐ KÝ TỰ
-// ========================================
 function updateCharCount() {
     const textarea = document.getElementById('fb-comment');
     const count = textarea.value.length;
     const charCountSpan = document.getElementById('char-count');
     
-    charCountSpan.textContent = count;
-    
-    if (count < 20) {
-        charCountSpan.style.color = '#ef4444';
-    } else if (count > 3000) {
-        charCountSpan.style.color = '#ef4444';
-    } else {
-        charCountSpan.style.color = '#16a34a';
+    if(charCountSpan) {
+        charCountSpan.textContent = count;
+        charCountSpan.style.color = (count < 20 || count > 3000) ? '#ef4444' : '#10b981';
     }
 }
 
-// ========================================
-// 11. XỬ LÝ SUBMIT FORM
-// ========================================
 async function handleFormSubmit(event) {
     event.preventDefault();
-    
     const mode = document.getElementById('fb-mode').value;
     const studentId = document.getElementById('fb-stu-id').value;
     const courseId = document.getElementById('fb-cour-id').value;
     const rating = parseInt(document.getElementById('fb-rating').value);
     const comment = document.getElementById('fb-comment').value.trim();
     
-    // Validation
-    if (!courseId) {
-        showStatus('Vui lòng chọn khóa học từ danh sách bên trái!', 'error');
-        return;
-    }
-    
-    if (rating < 1 || rating > 5) {
-        showStatus('Vui lòng chọn đánh giá từ 1-5 sao!', 'error');
-        return;
-    }
-    
-    if (comment.length < 20) {
-        showStatus('Nhận xét phải có ít nhất 20 ký tự!', 'error');
-        return;
-    }
-    
-    if (comment.length > 3000) {
-        showStatus('Nhận xét không được quá 3000 ký tự!', 'error');
-        return;
-    }
-    
-    try {
-        showStatus('Đang xử lý...', 'info');
-        
-        if (mode === 'add') {
-            await addFeedback(studentId, courseId, rating, comment);
-        } else if (mode === 'edit') {
-            await updateFeedback(studentId, courseId, rating, comment);
-        }
-        
-    } catch (error) {
-        console.error('Error submitting feedback:', error);
-        showStatus('Lỗi: ' + error.message, 'error');
-    }
-}
+    if (rating < 1) { alert('Vui lòng chọn số sao!'); return; }
+    if (comment.length < 20) { alert('Nhận xét quá ngắn (tối thiểu 20 ký tự)!'); return; }
 
-// ========================================
-// 12. GỌI API THÊM FEEDBACK
-// ========================================
-async function addFeedback(studentId, courseId, rating, comment) {
     try {
-        // TODO: Gọi API POST /api/feedback/add
-        const response = await fetch(`${API_BASE_URL}/feedback/add`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                studentId: studentId,
-                courseId: courseId,
-                rating: rating,
-                comment: comment
-            })
+        const endpoint = mode === 'add' ? '/feedback/add' : '/feedback/update';
+        const method = mode === 'add' ? 'POST' : 'PUT';
+        const body = { 
+            studentId, courseId, 
+            rating: rating, comment: comment,
+            // Với update API, backend có thể yêu cầu tên biến khác, ta map cả 2 cho chắc
+            newRating: rating, newComment: comment 
+        };
+
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
         });
         
         const data = await response.json();
         
-        if (!data.success) {
-            throw new Error(data.message || 'Không thể thêm đánh giá');
-        }
+        if (!data.success) throw new Error(data.message);
         
-        showStatus(data.message, 'success');
-        
-        // Reload data
-        await loadFeedbackData();
-        
-        // Reset form
-        resetForm();
+        alert(data.message);
+        closeModal();
+        loadFeedbackData(); // Reload lại bảng
         
     } catch (error) {
-        throw error;
+        alert('Lỗi: ' + error.message);
     }
 }
 
-// ========================================
-// 13. GỌI API CẬP NHẬT FEEDBACK
-// ========================================
-async function updateFeedback(studentId, courseId, newRating, newComment) {
-    try {
-        // TODO: Gọi API PUT /api/feedback/update
-        const response = await fetch(`${API_BASE_URL}/feedback/update`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                studentId: studentId,
-                courseId: courseId,
-                newRating: newRating,
-                newComment: newComment
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (!data.success) {
-            throw new Error(data.message || 'Không thể cập nhật đánh giá');
-        }
-        
-        showStatus(data.message, 'success');
-        
-        // Reload data
-        await loadFeedbackData();
-        
-        // Reset form
-        resetForm();
-        
-    } catch (error) {
-        throw error;
-    }
-}
-
-// ========================================
-// 14. XÓA FEEDBACK
-// ========================================
 async function handleDeleteFeedback() {
+    if (!confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) return;
+    
     const studentId = document.getElementById('fb-stu-id').value;
     const courseId = document.getElementById('fb-cour-id').value;
-    
-    if (!courseId) {
-        showStatus('Không có đánh giá nào được chọn!', 'error');
-        return;
-    }
-    
-    // Confirm dialog
-    if (!confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
-        return;
-    }
-    
+
     try {
-        showStatus('Đang xóa...', 'info');
-        
-        // TODO: Gọi API DELETE /api/feedback/delete
         const response = await fetch(`${API_BASE_URL}/feedback/delete`, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                studentId: studentId,
-                courseId: courseId
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentId, courseId })
         });
         
         const data = await response.json();
+        if (!data.success) throw new Error(data.message);
         
-        if (!data.success) {
-            throw new Error(data.message || 'Không thể xóa đánh giá');
-        }
-        
-        showStatus(data.message, 'success');
-        
-        // Reload data
-        await loadFeedbackData();
-        
-        // Reset form
-        resetForm();
+        alert(data.message);
+        closeModal();
+        loadFeedbackData();
         
     } catch (error) {
-        console.error('Error deleting feedback:', error);
-        showStatus('Lỗi: ' + error.message, 'error');
+        alert('Lỗi khi xóa: ' + error.message);
     }
 }
 
 // ========================================
-// 15. RESET FORM
+// 8. CÁC HÀM HELPERS KHÁC
 // ========================================
-function resetForm() {
-    selectedCourse = null;
-    
-    document.getElementById('fb-mode').value = 'add';
-    const titleIcon = '<span class="material-icons" style="vertical-align: middle; margin-right: 8px;">add_circle</span>';
-    document.getElementById('form-feedback-title').innerHTML = titleIcon + 'Thêm đánh giá mới';
-    
-    // Reset combobox
-    const courseSelect = document.getElementById('fb-course-select');
-    if (courseSelect) {
-        courseSelect.value = '';
-    }
-    
-    // Reset hidden fields and display
-    document.getElementById('fb-cour-id').value = '';
-    document.getElementById('fb-cour-id-display').textContent = '-';
-    document.getElementById('fb-comment').value = '';
-    
-    selectRating(0);
-    updateCharCount();
-    
-    document.getElementById('btn-delete-fb').style.display = 'none';
-    
-    showStatus('Vui lòng chọn khóa học từ danh sách bên trái để bắt đầu đánh giá.', 'muted');
-}
+function filterCourses() {
+    // Lấy từ khóa
+    const searchInput = document.getElementById('search-my-courses');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
 
-// ========================================
-// 16. LOAD LỊCH SỬ FEEDBACK
-// ========================================
-async function loadFeedbackHistory() {
-    try {
-        // TODO: Gọi API GET /api/student/:studentId/feedback-history
-        const response = await fetch(`${API_BASE_URL}/student/${CURRENT_STUDENT_ID}/feedback-history`);
-        
-        if (!response.ok) {
-            throw new Error('Không thể tải lịch sử feedback');
+    // Lấy trạng thái 
+    const filterSelect = document.getElementById('filter-feedback-status');
+    const filterStatus = filterSelect ? filterSelect.value : 'all';
+    
+    // Lọc
+    const filtered = currentCourses.filter(c => {
+        const name = c.courseName || c.Cour_name || '';
+        const matchesName = name.toLowerCase().includes(searchTerm);
+    
+        const rating = c.rating || c.Rating;
+
+        let matchesStatus = true;
+        if (filterStatus === 'rated') {
+            matchesStatus = (rating && rating > 0); 
+        } else if (filterStatus === 'unrated') {
+            matchesStatus = (!rating || rating === 0);
         }
-        
-        const data = await response.json();
-        currentFeedbackHistory = data.data || [];
-        
-        // Render table
-        renderFeedbackHistoryTable(currentFeedbackHistory);
-        
-    } catch (error) {
-        console.error('Error loading feedback history:', error);
-        const tbody = document.querySelector('#table-feedback-history tbody');
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="6" style="text-align: center; padding: 2rem; color: #ef4444;">
-                    Không thể tải lịch sử đánh giá: ${error.message}
-                </td>
-            </tr>
-        `;
+
+        return matchesName && matchesStatus;
+    });
+    renderCoursesTable(filtered);
+}
+
+function generateStarDisplay(rating) {
+    let starsHtml = '';
+    for (let i = 1; i <= 5; i++) {
+        starsHtml += `<span class="material-icons" style="font-size: 16px; color: ${i <= rating ? '#fbbf24' : '#e2e8f0'}; vertical-align: middle;">star</span>`;
     }
+    return `<span style="white-space: nowrap;">${starsHtml} <span style="font-weight: 600; color: #f59e0b; margin-left:4px;">${rating}</span></span>`;
 }
 
-// ========================================
-// 17. RENDER BẢNG LỊCH SỬ
-// ========================================
-function renderFeedbackHistoryTable(feedbacks) {
-    const tbody = document.querySelector('#table-feedback-history tbody');
-    
-    if (!feedbacks || feedbacks.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">
-                    Bạn chưa có đánh giá nào.
-                </td>
-            </tr>
-        `;
-        return;
-    }
-    
-    tbody.innerHTML = feedbacks.map(fb => {
-        const daysAgo = fb.daysAgo || fb.DaysAgo || 0;
-        const canEdit = daysAgo <= 30;
-        const rating = fb.rating || fb.Rating;
-        const ratingStars = generateStarDisplay(rating);
-        
-        return `
-            <tr>
-                <td>${formatDate(fb.dateRated || fb.Date_rat)}</td>
-                <!-- <td><strong>${fb.courseId || fb.Cour_id}</strong></td> -->
-                <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    ${fb.Cour_name || fb.Cour_name}
-                </td>
-                <td>${ratingStars}</td>
-                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 1rem;">
-                    ${fb.comment || fb.Comment}
-                </td>
-                <td>
-                    <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; 
-                                 background: ${canEdit ? '#dcfce7' : '#fee2e2'}; 
-                                 color: ${canEdit ? '#15803d' : '#991b1b'}; display: inline-flex; align-items: center; gap: 4px;">
-                        <span class="material-icons" style="font-size: 14px;">${canEdit ? 'edit' : 'lock'}</span>
-                        ${canEdit ? 'Có thể sửa' : 'Đã khóa'}
-                    </span>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
-
-// ========================================
-// 18. LOAD THỐNG KÊ
-// ========================================
-async function loadFeedbackStats() {
-    try {
-        // TODO: Gọi API GET /api/student/:studentId/feedback-stats
-        const response = await fetch(`${API_BASE_URL}/student/${CURRENT_STUDENT_ID}/feedback-stats`);
-        
-        if (!response.ok) {
-            throw new Error('Không thể tải thống kê');
-        }
-        
-        const data = await response.json();
-        const stats = data.stats || {};
-        
-        // Update stats display
-        document.getElementById('stat-total-feedback').textContent = stats.totalFeedback || 0;
-        document.getElementById('stat-avg-rating').textContent = 
-            stats.avgRating ? stats.avgRating.toFixed(1) : '0.0';
-        document.getElementById('stat-pending-courses').textContent = stats.pendingCourses || 0;
-        
-    } catch (error) {
-        console.error('Error loading stats:', error);
-        document.getElementById('stat-total-feedback').textContent = '-';
-        document.getElementById('stat-avg-rating').textContent = '-';
-        document.getElementById('stat-pending-courses').textContent = '-';
-    }
-}
-
-// ========================================
-// 19. HIỂN THỊ STATUS MESSAGE
-// ========================================
-function showStatus(message, type = 'info') {
-    const statusDiv = document.getElementById('fb-status');
-    
-    // Colors based on type
-    const colors = {
-        success: { bg: '#dcfce7', text: '#15803d', border: '#86efac' },
-        error: { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5' },
-        warning: { bg: '#fef3c7', text: '#92400e', border: '#fcd34d' },
-        info: { bg: '#dbeafe', text: '#1e40af', border: '#93c5fd' },
-        muted: { bg: '#f1f5f9', text: '#64748b', border: '#cbd5e1' }
-    };
-    
-    const color = colors[type] || colors.info;
-    
-    statusDiv.style.background = color.bg;
-    statusDiv.style.color = color.text;
-    statusDiv.style.borderLeft = `4px solid ${color.border}`;
-    statusDiv.textContent = message;
-}
-
-// ========================================
-// 20. HELPER FUNCTIONS
-// ========================================
 function formatDate(dateString) {
     if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN');
+    return new Date(dateString).toLocaleDateString('vi-VN');
 }
 
-// ========================================
-// EXPORT FUNCTIONS FOR INLINE ONCLICK
-// ========================================
-window.addNewFeedback = addNewFeedback;
-window.editFeedback = editFeedback;
-window.loadMyCourses = loadMyCourses;
+async function loadFeedbackStats() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/student/${CURRENT_STUDENT_ID}/feedback-stats`);
+        const data = await response.json();
+        if (data.success && data.stats) {
+            document.getElementById('stat-total-feedback').textContent = data.stats.totalFeedback || 0;
+            document.getElementById('stat-avg-rating').textContent = data.stats.avgRating ? data.stats.avgRating.toFixed(1) : '0.0';
+            const totalCoursesEl = document.getElementById('stat-total-courses');
+            if (totalCoursesEl) {
+                totalCoursesEl.textContent = data.stats.totalCourses || 0;
+            }
+        }
+    } catch (e) { console.error(e); }
+}
+
+function updateFilterColor() {
+    const filterSelect = document.getElementById('filter-feedback-status');
+    if (!filterSelect) return;
+
+    filterSelect.classList.remove('status-rated', 'status-unrated');
+
+    const value = filterSelect.value;
+    
+    if (value === 'rated') {
+        filterSelect.classList.add('status-rated');
+    } else if (value === 'unrated') {
+        filterSelect.classList.add('status-unrated');
+    }
+}
+
+// Export functions for global access
+window.handleCourseRowClick = handleCourseRowClick;
+window.closeModal = closeModal;
+window.loadFeedbackData = loadFeedbackData;
