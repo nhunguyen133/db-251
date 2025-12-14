@@ -1,12 +1,7 @@
-﻿------------------------------
+﻿﻿------------------------------
 -- TASK 2.4
 ------------------------------
--- HÀM 1: Xếp loại giảng viên dựa trên đánh giá (Dùng Cursor & IF) ---
-
--- Mục tiêu: Tính điểm đánh giá trung bình của giảng viên và xếp loại
--- Input: Teacher_id
--- Output: Chuỗi xếp loại (VARCHAR)
-------------------------------
+GO
 CREATE OR ALTER FUNCTION dbo.fn_RankTeacher
 (
     @Tea_id CHAR(10)
@@ -17,7 +12,7 @@ BEGIN
     -- 1. KIỂM TRA THAM SỐ ĐẦU VÀO
     -- Kiểm tra xem giảng viên có tồn tại trong hệ thống không
     IF NOT EXISTS (SELECT 1 FROM TEACHER WHERE Teacher_id = @Tea_id)
-        RETURN 'N/A'; -- Trả về Not Available nếu không tìm thấy
+        RETURN 'N/A';
 
     DECLARE @TotalScore FLOAT = 0;
     DECLARE @CountCourses INT = 0;
@@ -93,7 +88,7 @@ GO
 
 -- Sử dụng: REGISTER, COURSE, RECEIVE, FEEDBACK
 ------------------------------
-CREATE OR ALTER FUNCTION dbo.fn_CalcStudentLoyaltyRank
+CREATE OR ALTER FUNCTION fn_CalcStudentLoyaltyRank
 (
     @StuID CHAR(10)
 )
@@ -188,3 +183,15 @@ GO
 -- Test trường hợp Student không tồn tại
 SELECT dbo.fn_CalcStudentLoyaltyRank('U999999998') AS LoyaltyRank;
 GO
+
+SELECT 
+    t.Teacher_id,
+    u.L_name + ' ' + u.F_name AS Teacher_name,
+    COUNT(c.Course_id) AS NumCourses
+FROM TEACHER t
+LEFT JOIN [USER] u 
+    ON u.User_id = t.Teacher_id
+LEFT JOIN COURSE c 
+    ON c.Tea_id = t.Teacher_id
+GROUP BY t.Teacher_id, u.L_name, u.F_name
+ORDER BY NumCourses DESC;

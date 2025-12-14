@@ -949,7 +949,7 @@ async function handleSaveCourse() {
             minAvgScore: parseFloat(minAvgScore)
         };
         
-        console.log('📤 Sending request:', method, url, payload);
+        console.log('Sending request:', method, url, payload);
         
         const response = await fetch(url, {
             method: method,
@@ -970,9 +970,9 @@ async function handleSaveCourse() {
         );
         hideModalCourseForm();
         
-        console.log('🔄 Reloading teacher stats...');
+        console.log('Reloading teacher stats...');
         await loadTeacherStats(currentTeacherId);
-        console.log('✅ Stats reloaded!');
+        console.log('Stats reloaded!');
         
     } catch (error) {
         console.error('Error saving course:', error);

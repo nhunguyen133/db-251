@@ -352,13 +352,28 @@ app.get('/api/teacher/:teacherId/rank', async (req, res) => {
         const { teacherId } = req.params;
         const pool = await getPool();
         
-        const result = await pool.request()
+        // Get rank
+        const rankResult = await pool.request()
             .input('TeacherId', sql.Char(10), teacherId)
             .query('SELECT dbo.fn_RankTeacher(@TeacherId) AS Rank');
         
+        // Get teacher name
+        const nameResult = await pool.request()
+            .input('TeacherId', sql.Char(10), teacherId)
+            .query(`
+                SELECT u.L_name + ' ' + u.F_name AS TeacherName, t.Expertise
+                FROM TEACHER t
+                INNER JOIN [USER] u ON t.Teacher_id = u.User_id
+                WHERE t.Teacher_id = @TeacherId
+            `);
+        
         res.json({
             success: true,
-            data: result.recordset[0]
+            data: {
+                Rank: rankResult.recordset[0].Rank,
+                TeacherName: nameResult.recordset[0]?.TeacherName || 'N/A',
+                Expertise: nameResult.recordset[0]?.Expertise || ''
+            }
         });
     } catch (err) {
         console.error('Error in GET /api/teacher/:teacherId/rank:', err);
@@ -375,14 +390,26 @@ app.get('/api/student/:studentId/loyalty', async (req, res) => {
         const { studentId } = req.params;
         const pool = await getPool();
         
-        const result = await pool.request()
+        // Get loyalty rank
+        const loyaltyResult = await pool.request()
             .input('StudentId', sql.Char(10), studentId)
             .query('SELECT dbo.fn_CalcStudentLoyaltyRank(@StudentId) AS Loyalty');
+        
+        // Get student name
+        const nameResult = await pool.request()
+            .input('StudentId', sql.Char(10), studentId)
+            .query(`
+                SELECT u.L_name + ' ' + u.F_name AS StudentName
+                FROM STUDENT s
+                INNER JOIN [USER] u ON s.Student_id = u.User_id
+                WHERE s.Student_id = @StudentId
+            `);
         
         res.json({
             success: true,
             data: {
-                Loyalty: result.recordset[0].Loyalty
+                Loyalty: loyaltyResult.recordset[0].Loyalty,
+                StudentName: nameResult.recordset[0]?.StudentName || 'N/A'
             }
         });
     } catch (err) {
@@ -547,7 +574,7 @@ app.post('/api/course/add', async (req, res) => {
     try {
         const { teacherId, courseName, price, datePublic, description, language, minAvgScore } = req.body;
         
-        if (!teacherId || !courseName || !price || !language || minAvgScore === undefined) {
+        if (!teacherId || !courseName || price === undefined || price === null || !language || minAvgScore === undefined) {
             return res.status(400).json({
                 success: false,
                 message: 'Thiếu thông tin bắt buộc: teacherId, courseName, price, language, minAvgScore'
@@ -555,6 +582,13 @@ app.post('/api/course/add', async (req, res) => {
         }
         
         // Validate
+        if (price < 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Giá khóa học phải >= 0'
+            });
+        }
+        
         if (minAvgScore < 0 || minAvgScore > 10) {
             return res.status(400).json({
                 success: false,
@@ -603,7 +637,7 @@ app.put('/api/course/update', async (req, res) => {
     try {
         const { courseId, courseName, price, datePublic, description, language, minAvgScore } = req.body;
         
-        if (!courseId || !courseName || !price || !language || minAvgScore === undefined) {
+        if (!courseId || !courseName || price === undefined || price === null || !language || minAvgScore === undefined) {
             return res.status(400).json({
                 success: false,
                 message: 'Thiếu thông tin bắt buộc: courseId, courseName, price, language, minAvgScore'
@@ -611,6 +645,13 @@ app.put('/api/course/update', async (req, res) => {
         }
         
         // Validate
+        if (price < 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Giá khóa học phải >= 0'
+            });
+        }
+        
         if (minAvgScore < 0 || minAvgScore > 10) {
             return res.status(400).json({
                 success: false,
@@ -619,6 +660,24 @@ app.put('/api/course/update', async (req, res) => {
         }
         
         const pool = await getPool();
+        
+        // Kiểm tra xem có học viên nào đã thanh toán khóa học này chưa
+        const paidStudentsCheck = await pool.request()
+            .input('CourseId', sql.Char(10), courseId)
+            .query(`
+                SELECT COUNT(*) AS PaidCount 
+                FROM REGISTER 
+                WHERE Cour_id = @CourseId AND Payment_status = 'completed'
+            `);
+        
+        const paidCount = paidStudentsCheck.recordset[0].PaidCount;
+        
+        if (paidCount > 0) {
+            return res.status(403).json({
+                success: false,
+                message: `Không thể cập nhật khóa học! Đã có ${paidCount} học viên thanh toán. Chỉ có thể cập nhật khi chưa có học viên nào thanh toán.`
+            });
+        }
         
         // Sử dụng stored procedure usp_UpdateCourse từ 2.3.sql
         await pool.request()
@@ -672,6 +731,24 @@ app.delete('/api/course/delete', async (req, res) => {
             return res.status(403).json({
                 success: false,
                 message: 'Bạn không có quyền xóa khóa học này'
+            });
+        }
+        
+        // Kiểm tra xem có học viên nào đã thanh toán khóa học này chưa
+        const paidStudentsCheck = await pool.request()
+            .input('CourseId', sql.Char(10), courseId)
+            .query(`
+                SELECT COUNT(*) AS PaidCount 
+                FROM REGISTER 
+                WHERE Cour_id = @CourseId AND Payment_status = 'completed'
+            `);
+        
+        const paidCount = paidStudentsCheck.recordset[0].PaidCount;
+        
+        if (paidCount > 0) {
+            return res.status(403).json({
+                success: false,
+                message: `Không thể xóa khóa học! Đã có ${paidCount} học viên thanh toán. Chỉ có thể xóa khi chưa có học viên nào thanh toán.`
             });
         }
         

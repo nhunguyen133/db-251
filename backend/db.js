@@ -1,6 +1,3 @@
-// backend/db.js
-// Kết nối đến SQL Server cho Educity
-
 const sql = require('mssql');
 
 const config = {
@@ -16,9 +13,6 @@ const config = {
 
 let poolPromise;
 
-/**
- * Lấy connection pool dùng chung
- */
 async function getPool() {
     if (!poolPromise) {
         poolPromise = sql.connect(config)
@@ -28,7 +22,7 @@ async function getPool() {
             })
             .catch(err => {
                 console.error("Lỗi kết nối database:", err.message);
-                poolPromise = null; // Reset để thử lại
+                poolPromise = null; // Reset
                 throw err;
             });
     }

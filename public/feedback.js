@@ -6,7 +6,7 @@
 const API_BASE_URL = 'http://localhost:3000/api';
 
 // Current Student ID (hardcoded for demo)
-const CURRENT_STUDENT_ID = 'U000000003';
+const CURRENT_STUDENT_ID = 'U000000014';
 
 // Global state
 let currentCourses = [];
@@ -393,16 +393,25 @@ async function handleFormSubmit(event) {
     const comment = document.getElementById('fb-comment').value.trim();
     
     if (rating < 1) { alert('Vui lòng chọn số sao!'); return; }
-    if (comment.length < 20) { alert('Nhận xét quá ngắn (tối thiểu 20 ký tự)!'); return; }
+    
+    // Validate comment: không bắt buộc, nhưng nếu có thì phải >= 20 ký tự
+    if (comment.length > 0 && comment.length < 20) { 
+        alert('Nhận xét phải có ít nhất 20 ký tự hoặc để trống!'); 
+        return; 
+    }
 
     try {
         const endpoint = mode === 'add' ? '/feedback/add' : '/feedback/update';
         const method = mode === 'add' ? 'POST' : 'PUT';
+        
+        // Nếu comment rỗng, gửi null thay vì chuỗi rỗng để phù hợp với CHECK constraint
+        const finalComment = comment.length === 0 ? null : comment;
+        
         const body = { 
             studentId, courseId, 
-            rating: rating, comment: comment,
+            rating: rating, comment: finalComment,
             // Với update API, backend có thể yêu cầu tên biến khác, ta map cả 2 cho chắc
-            newRating: rating, newComment: comment 
+            newRating: rating, newComment: finalComment 
         };
 
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {

@@ -118,12 +118,6 @@ function displayTopCourses(courses) {
                 </span>
             </td>
 
-            <td style="text-align: left; width: 100px; border-left: none; padding-left: 0;">
-                <div style="display: flex; align-items: center;">
-                    ${generateStarRating(course.AvgRating)}
-                </div>
-            </td>
-
             <td style="text-align: center; width: 50px; border-right: none;">
                 <span style="font-weight: 700; color: #f59e0b; font-size: 1rem;">
                     ${course.AvgRating}
@@ -136,30 +130,6 @@ function displayTopCourses(courses) {
 // ========================================
 // 5. HELPER FUNCTIONS
 // ========================================
-function generateStarRating(rating) {
-    if (!rating) return '';
-    const score = parseFloat(rating);
-    let starsHtml = '';
-
-    for (let i = 1; i <= 5; i++) {
-        if (score >= i) {
-            starsHtml += '<span class="material-icons" style="color: #fbbf24; font-size: 18px; vertical-align: middle;">star</span>';
-        } else if (score > i - 1) {
-            const percent = (score - (i - 1)) * 100;
-            starsHtml += `
-            <div style="position: relative; display: inline-block; width: 18px; height: 18px; vertical-align: middle;">
-                <span class="material-icons" style="color: #e2e8f0; font-size: 18px; position: absolute; left: 0; top: 0; z-index: 1;">star_border</span>
-                <div style="width: ${percent}%; height: 100%; overflow: hidden; position: absolute; left: 0; top: 0; z-index: 2;">
-                    <span class="material-icons" style="color: #fbbf24; font-size: 18px;">star</span>
-                </div>
-            </div>`;
-        } else {
-            starsHtml += '<span class="material-icons" style="color: #e2e8f0; font-size: 18px; vertical-align: middle;">star_border</span>';
-        }
-    }
-    return starsHtml;
-}
-
 function showTableLoading(tableId, colspan) {
     const tbody = document.querySelector(`#${tableId} tbody`);
     if (!tbody) return;

@@ -2,51 +2,51 @@
 
 Hệ thống quản lý feedback và thống kê phân tích cho nền tảng e-learning Educity.
 
-## 📋 Thông tin dự án
+## Thông tin dự án
 
 - **Môn học**: Hệ cơ sở dữ liệu (CO2013) - 251
 - **Bài tập lớn**: BTL2 - Stored Procedures, Functions & Frontend Integration
 - **Nhóm**: 6-L03
 - **Năm học**: 2024-2025
 
-## 🚀 Tính năng chính
+## Tính năng chính
 
 ### 1. Feedback Management (Panel 1)
-- ✅ Thêm feedback mới cho khóa học đã đăng ký
-- ✅ Sửa feedback trong vòng 30 ngày
-- ✅ Xóa feedback trong vòng 30 ngày
-- ✅ Xem lịch sử feedback và thống kê chi tiết
-- ✅ Interactive 5-star rating system
-- ✅ Real-time validation (20-3000 ký tự)
+- Thêm feedback mới cho khóa học đã đăng ký
+- Sửa feedback trong vòng 30 ngày
+- Xóa feedback trong vòng 30 ngày
+- Xem lịch sử feedback và thống kê chi tiết
+- Interactive 5-star rating system
+- Real-time validation (20-3000 ký tự)
 
 ### 2. Top Courses Analytics (Panel 2)
-- ✅ Lọc top khóa học theo năm xuất bản
-- ✅ Filter theo số lượng review tối thiểu
-- ✅ Hiển thị rating trung bình và số lượng feedback
-- ✅ Stored Procedure: `usp_GetTopRatedCourses`
+- Lọc top khóa học theo năm xuất bản
+- Filter theo số lượng review tối thiểu
+- Hiển thị rating trung bình và số lượng feedback
+- Stored Procedure: `usp_GetTopRatedCourses`
 
 ### 3. Teacher Dashboard (Panel 3)
-- ✅ Thống kê chi tiết khóa học của giảng viên
-- ✅ Hiển thị: Feedback count, Rating TB, Số HV đăng ký, Điểm TB
-- ✅ **MỚI**: Số chứng chỉ đã cấp
-- ✅ **MỚI**: Doanh thu khóa học
-- ✅ Xếp hạng giảng viên (Function: `fn_RankTeacher`)
-- ✅ Stored Procedure: `usp_GetTeacherCourseStats`
+- Thống kê chi tiết khóa học của giảng viên
+- Hiển thị: Feedback count, Rating TB, Số HV đăng ký, Điểm TB
+- **MỚI**: Số chứng chỉ đã cấp
+- **MỚI**: Doanh thu khóa học
+- Xếp hạng giảng viên (Function: `fn_RankTeacher`)
+- Stored Procedure: `usp_GetTeacherCourseStats`
 
 ### 4. Student Loyalty (Panel 4)
-- ✅ Tính toán loyalty rank của học viên
-- ✅ Function: `fn_CalcStudentLoyaltyRank`
-- ✅ Hiển thị hạng thành viên (Bronze/Silver/Gold/Platinum)
+- Tính toán loyalty rank của học viên
+- Function: `fn_CalcStudentLoyaltyRank`
+- Hiển thị hạng thành viên (Bronze/Silver/Gold/Platinum)
 
 ### UI/UX Excellence
-- 🎨 Material Design với Material Icons
-- 📱 Responsive Single Page Application (SPA)
-- 🌈 Modern gradient theme với dark accents
-- ⚡ Fast navigation với tab switching
-- 🎯 Professional dashboard layout
-- ✨ Smooth animations và transitions
+- Material Design với Material Icons
+- Responsive Single Page Application (SPA)
+- Modern gradient theme với dark accents
+- Fast navigation với tab switching
+- Professional dashboard layout
+- Smooth animations và transitions
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 **Frontend:**
 - HTML5, CSS3 (Modern CSS Variables & Flexbox)
@@ -72,7 +72,7 @@ Hệ thống quản lý feedback và thống kê phân tích cho nền tảng e-
 - Async/await for API calls
 - Modular frontend (1 file per panel)
 
-## � Quick Start Guide
+## Quick Start Guide
 
 ### Prerequisites
 - Node.js v16 or higher
@@ -134,7 +134,7 @@ Output: `Server running on http://localhost:3000`
 4. Thử thêm feedback cho 1 khóa học
 5. Khám phá các panel khác (Top Courses, Teacher, Student)
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Lỗi kết nối database
 ```
@@ -178,7 +178,7 @@ taskkill /PID <PID> /F
 const PORT = 3001;
 ```
 
-## 📁 Cấu trúc dự án
+## Cấu trúc dự án
 
 ```
 educity-web/
@@ -213,7 +213,7 @@ educity-web/
 └── package-lock.json
 ```
 
-### 📊 File Statistics
+### File Statistics
 
 | File | Lines | Purpose |
 |------|-------|---------|
@@ -225,7 +225,7 @@ educity-web/
 | `app.js` | 70 | Navigation only |
 | `styles.css` | 359 | All styling |
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Student & Feedback APIs (Panel 1)
 ```
@@ -274,14 +274,14 @@ GET    /api/student/:studentId/loyalty
 
 **Tổng cộng: 11 API endpoints**
 
-## ✅ Validation Rules
+## Validation Rules
 
 - **Rating**: 1-5 sao (bắt buộc)
 - **Comment**: 20-3000 ký tự (bắt buộc)
 - **Edit/Delete**: Chỉ trong vòng 30 ngày kể từ ngày đánh giá
 - **Courses**: Hiển thị tất cả khóa học đã đăng ký
 
-## 🎯 Database Objects
+## Database Objects
 
 ### Stored Procedures
 
@@ -326,7 +326,7 @@ GET    /api/student/:studentId/loyalty
   - Hạng thành viên: "Platinum Member", "Gold Member", "Silver Member", "Bronze Member"
   - Tiêu chí: Số khóa học đã hoàn thành, Tổng số tiền, Số feedback
 
-## 🧪 Testing
+## Testing
 
 ### Sample Test Data
 ```javascript
@@ -343,41 +343,41 @@ U000000001, U000000002, U000000003, U000000004, U000000005
 
 ### Test Scenarios
 
-#### Panel 1: Feedback CRUD ✅
-1. ✅ Thêm feedback cho khóa học chưa đánh giá
-2. ✅ Sửa feedback trong vòng 30 ngày
-3. ✅ Không thể sửa/xóa feedback quá 30 ngày
-4. ✅ Validation rating (1-5) và comment (20-3000)
-5. ✅ Tìm kiếm khóa học theo tên
-6. ✅ Hiển thị lịch sử và thống kê
+#### Panel 1: Feedback CRUD
+1. Thêm feedback cho khóa học chưa đánh giá
+2. Sửa feedback trong vòng 30 ngày
+3. Không thể sửa/xóa feedback quá 30 ngày
+4. Validation rating (1-5) và comment (20-3000)
+5. Tìm kiếm khóa học theo tên
+6. Hiển thị lịch sử và thống kê
 
-#### Panel 2: Top Courses ✅
-1. ✅ Filter theo năm xuất bản (2024, 2025)
-2. ✅ Filter theo số review tối thiểu (1, 5, 10)
-3. ✅ Hiển thị đúng rating và số lượng feedback
-4. ✅ Sắp xếp theo rating giảm dần
+#### Panel 2: Top Courses
+1. Filter theo năm xuất bản (2024, 2025)
+2. Filter theo số review tối thiểu (1, 5, 10)
+3. Hiển thị đúng rating và số lượng feedback
+4. Sắp xếp theo rating giảm dần
 
-#### Panel 3: Teacher Dashboard ✅
-1. ✅ Hiển thị thống kê 8 cột (có chứng chỉ + doanh thu)
-2. ✅ Format doanh thu đúng (75,000,000 ₫)
-3. ✅ Hiển thị xếp hạng giảng viên
-4. ✅ Teacher không tồn tại → hiển thị error
+#### Panel 3: Teacher Dashboard
+1. Hiển thị thống kê 8 cột (có chứng chỉ + doanh thu)
+2. Format doanh thu đúng (75,000,000 ₫)
+3. Hiển thị xếp hạng giảng viên
+4. Teacher không tồn tại → hiển thị error
 
-#### Panel 4: Student Loyalty ✅
-1. ✅ Hiển thị loyalty rank (Platinum/Gold/Silver/Bronze)
-2. ✅ Student không tồn tại → hiển thị error
-3. ✅ Loading states khi gọi API
+#### Panel 4: Student Loyalty
+1. Hiển thị loyalty rank (Platinum/Gold/Silver/Bronze)
+2. Student không tồn tại → hiển thị error
+3. Loading states khi gọi API
 
-## 📝 BTL Requirements Compliance
+## BTL Requirements Compliance
 
-### ✅ Task 3.1 - CRUD Operations (Panel 1)
+### Task 3.1 - CRUD Operations (Panel 1)
 - [x] Giao diện thêm/sửa/xóa/xem feedback
 - [x] Validation đầy đủ (client + server side)
 - [x] Error handling từ stored procedures
 - [x] Return codes được xử lý đúng (0, 1, 2)
 - [x] UI/UX professional với Material Design
 
-### ✅ Task 3.2 - List & Search
+### Task 3.2 - List & Search
 - [x] Hiển thị danh sách từ procedures/functions
 - [x] Tìm kiếm real-time theo tên khóa học
 - [x] Sắp xếp (ORDER BY trong SQL queries)
@@ -385,26 +385,26 @@ U000000001, U000000002, U000000003, U000000004, U000000005
 - [x] Validate dữ liệu đầu vào (JS + SQL)
 - [x] Loading states và error handling
 
-### ✅ Task 3.3 - Advanced Features
+### Task 3.3 - Advanced Features
 - [x] Gọi procedures: `usp_GetTopRatedCourses`, `usp_GetTeacherCourseStats`
 - [x] Gọi functions: `fn_RankTeacher`, `fn_CalcStudentLoyaltyRank`
 - [x] Hiển thị kết quả thống kê đẹp mắt
 - [x] Giao diện professional và responsive
 - [x] Multiple panels với smooth navigation
 
-### 🎨 Bonus Features (Beyond Requirements)
-- ✨ Single Page Application (SPA) architecture
-- ✨ Modular code structure (1 file per panel)
-- ✨ Real-time character counting
-- ✨ Interactive 5-star rating
-- ✨ Progress bars cho learning progress
-- ✨ Color-coded status indicators
-- ✨ Material Icons integration
-- ✨ Format tiền tệ VN (75,000,000 ₫)
-- ✨ Responsive design cho mobile
-- ✨ Comprehensive documentation
+### Bonus Features (Beyond Requirements)
+- Single Page Application (SPA) architecture
+- Modular code structure (1 file per panel)
+- Real-time character counting
+- Interactive 5-star rating
+- Progress bars cho learning progress
+- Color-coded status indicators
+- Material Icons integration
+- Format tiền tệ VN (75,000,000 ₫)
+- Responsive design cho mobile
+- Comprehensive documentation
 
-## 🎨 UI Features & Design
+## UI Features & Design
 
 ### Material Design Components
 - **Material Icons**: 30+ icons cho intuitive UX
@@ -433,12 +433,12 @@ U000000001, U000000002, U000000003, U000000004, U000000005
 ```
 
 ### Status Colors
-- 🟢 **Green**: Completed courses (100%), Success actions
-- 🟡 **Yellow**: In-progress courses, Warnings
-- 🔴 **Red**: Cannot edit (>30 days), Errors
-- 🔵 **Blue**: Info, Average scores
-- 🟣 **Purple**: Feedback counts
-- 🟠 **Orange**: Certificates
+- **Green**: Completed courses (100%), Success actions
+- **Yellow**: In-progress courses, Warnings
+- **Red**: Cannot edit (>30 days), Errors
+- **Blue**: Info, Average scores
+- **Purple**: Feedback counts
+- **Orange**: Certificates
 
 ### Animations & Transitions
 - Smooth 0.3s transitions on all interactive elements
@@ -447,7 +447,7 @@ U000000001, U000000002, U000000003, U000000004, U000000005
 - Loading spinner với rotation animation
 - Scale effects trên cards hover
 
-## � Documentation
+## Documentation
 
 ### Main Documentation
 - `README.md` (this file) - Complete project overview
@@ -468,73 +468,7 @@ All JavaScript files có extensive comments:
 - Database object references
 - Business logic explanations
 
-## 🎓 Learning Outcomes
-
-Dự án này giúp học viên nắm vững:
-
-### Database Concepts
-- ✅ Thiết kế database schema (8+ tables)
-- ✅ Stored Procedures (CRUD + Analytics)
-- ✅ Scalar Functions (Business logic)
-- ✅ Complex JOINs và subqueries
-- ✅ Derived Tables để tránh duplicate data
-- ✅ Transaction handling và error codes
-- ✅ Data validation ở database level
-
-### Backend Development
-- ✅ RESTful API design
-- ✅ Express.js routing
-- ✅ Async/await patterns
-- ✅ Error handling và status codes
-- ✅ CORS configuration
-- ✅ Database connection pooling
-- ✅ SQL injection prevention
-
-### Frontend Development
-- ✅ Single Page Application (SPA)
-- ✅ Modular JavaScript architecture
-- ✅ Event-driven programming
-- ✅ Fetch API và async operations
-- ✅ DOM manipulation
-- ✅ Form validation
-- ✅ Responsive CSS design
-- ✅ Material Design principles
-
-### Software Engineering
-- ✅ Code organization và modularity
-- ✅ Separation of concerns
-- ✅ DRY principle (Don't Repeat Yourself)
-- ✅ Clean code practices
-- ✅ Documentation và comments
-- ✅ Version control (Git)
-- ✅ Troubleshooting và debugging
-
-## 🌟 Project Highlights
-
-### Technical Excellence
-- 🏆 **11 API endpoints** hoàn chỉnh với error handling
-- 🏆 **4 Stored Procedures** + **2 Scalar Functions**
-- 🏆 **Modular architecture** - mỗi panel 1 file riêng
-- 🏆 **1300+ lines** frontend JavaScript
-- 🏆 **400+ lines** backend Express code
-- 🏆 **Zero code duplication** sau refactoring
-
-### User Experience
-- 🎯 **Professional UI** với Material Design
-- 🎯 **Intuitive navigation** với SPA
-- 🎯 **Real-time validation** và feedback
-- 🎯 **Loading states** cho mọi API call
-- 🎯 **Error handling** user-friendly
-- 🎯 **Responsive** trên mọi devices
-
-### Database Design
-- 📊 **Normalized schema** (3NF)
-- 📊 **Efficient queries** với indexes
-- 📊 **Data integrity** với constraints
-- 📊 **Business logic** trong stored procedures
-- 📊 **Return codes** cho error handling
-
-## 👥 Team & Credits
+## Team & Credits
 
 **Nhóm 6-L03**  
 Môn: Hệ cơ sở dữ liệu (CO2013-251)  
@@ -548,26 +482,6 @@ Học kỳ: 2024-2025
 - Material Design
 - Git & GitHub
 
-## 📄 License
+## License
 
 Educational project - HCMUT 2025
-
----
-
-## 📞 Contact & Support
-
-Nếu gặp vấn đề khi chạy project:
-
-1. **Kiểm tra Prerequisites**: Node.js v16+, SQL Server running
-2. **Xem Troubleshooting section**: Các lỗi thường gặp
-3. **Check Documentation**: Đọc các file .md trong project
-4. **Review Code Comments**: All files có extensive comments
-
----
-
-**⚠️ Important Notes:**
-- Đảm bảo SQL Server đang chạy
-- Database `Educity` phải được tạo trước
-- Chạy đủ 4 file SQL theo thứ tự
-- Port 3000 phải available
-- Sử dụng Windows Authentication

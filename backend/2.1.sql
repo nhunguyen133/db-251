@@ -6,7 +6,7 @@ CREATE OR ALTER PROC usp_AddFeedback
     @Stu_id     CHAR(10),
     @Cour_id    CHAR(10),
     @Rating     INT,
-    @Comment    VARCHAR(3000)
+    @Comment    VARCHAR(3000) = null
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -62,7 +62,7 @@ BEGIN
     END
 
     -- 6. Kiểm tra độ dài comment (nếu có)
-    IF (@Comment IS NOT NULL AND LEN(LTRIM(RTRIM(@Comment))) < 20)
+    IF (@Comment IS NOT NULL AND LEN(LTRIM(RTRIM(@Comment))) > 0 AND LEN(LTRIM(RTRIM(@Comment))) < 20)
     BEGIN
         RAISERROR ('Comment content must be at least 20 characters long.', 16, 1);
         RETURN;
@@ -116,7 +116,7 @@ BEGIN
     END
 
     -- 4. Kiểm tra nội dung comment mới
-    IF (@NewComment IS NOT NULL AND LEN(LTRIM(RTRIM(@NewComment))) < 20)
+    IF (@NewComment IS NOT NULL AND LEN(LTRIM(RTRIM(@NewComment))) > 0 AND LEN(LTRIM(RTRIM(@NewComment))) < 20)
     BEGIN
         RAISERROR ('Comment content must be at least 20 characters long.', 16, 1);
         RETURN;
@@ -133,7 +133,7 @@ GO
 -- =============================================
 -- 3. THỦ TỤC DELETE FEEDBACK
 -- =============================================
-CREATE OR ALTER PROCEDURE usp_DeleteFeedback
+CREATE PROCEDURE usp_DeleteFeedback
     @Stu_id  CHAR(10),
     @Cour_id CHAR(10)
 AS
@@ -170,3 +170,14 @@ BEGIN
     WHERE Stu_id = @Stu_id AND Cour_id = @Cour_id;
 END;
 GO
+
+
+USE Educity;
+GO
+
+SELECT DISTINCT
+    Stu_id
+FROM 
+    FEEDBACK
+WHERE 
+    DATEDIFF(DAY, Date_rat, GETDATE()) <= 30;

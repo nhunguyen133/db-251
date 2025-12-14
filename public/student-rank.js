@@ -1,14 +1,3 @@
-// ========================================
-// PANEL 4: FUNCTIONS - RANKING & EVALUATION
-// ========================================
-// Chức năng: 
-// 1. Function 1: Xếp loại giảng viên (fn_RankTeacher)
-// 2. Function 2: Hạng thành viên học viên (fn_CalcStudentLoyaltyRank)
-// API: 
-// - GET /api/teacher/:teacherId/rank (Function 1)
-// - GET /api/student/:studentId/loyalty (Function 2)
-// ========================================
-
 console.log('Panel Student/Functions loaded - Teacher Rank & Student Loyalty');
 
 // API Base URL
@@ -23,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupStudentLoyaltyForm();
     setupAllTeachersRankingTable();
     setupAllStudentsLoyaltyTable();
-});
+});``
 
 // ========================================
 // TAB SWITCHING SYSTEM
@@ -132,6 +121,8 @@ function displayTeacherRank(rankData) {
     }
     
     const rank = rankData.Rank;
+    const teacherName = rankData.TeacherName || 'N/A';
+    const expertise = rankData.Expertise || '';
     
     // Define rank colors and icons
     const rankStyles = {
@@ -189,15 +180,20 @@ function displayTeacherRank(rankData) {
         iconElement.style.color = style.color;
     }
     
-    // Display rank with styled text
+    // Display rank with teacher name and styled text
     resultDiv.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
-            <span class="material-icons" style="font-size: 2.5rem; color: ${style.color};">${style.icon}</span>
-            <span style="color: ${style.color};">${rank}</span>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="color: ${style.color}; font-size: 2rem; font-weight: 700;">${rank}</span>
+            </div>
+            <div style="text-align: center; color: #1e293b;">
+                <div style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem;">${teacherName}</div>
+                ${expertise ? `<div style="font-size: 0.9rem; color: #64748b;">Chuyên môn: ${expertise}</div>` : ''}
+            </div>
         </div>
     `;
     
-    showToast(`Xếp loại: ${rank}`, 'success', 'Thành công');
+    showToast(`Xếp loại ${rank}: ${teacherName}`, 'success', 'Thành công');
 }
 
 // ========================================
@@ -270,6 +266,7 @@ function displayStudentLoyalty(loyaltyData) {
     
     // Parse loyalty string: "Diamond (Points: 550)" or "New Member (Points: 50)"
     const loyaltyText = loyaltyData.Loyalty;
+    const studentName = loyaltyData.StudentName || 'N/A';
     const rankMatch = loyaltyText.match(/^(.+?)\s*\(Points:\s*(\d+)\)$/);
     
     if (!rankMatch) {
@@ -325,20 +322,22 @@ function displayStudentLoyalty(loyaltyData) {
         iconElement.style.color = style.color;
     }
     
-    // Display loyalty with styled format
+    // Display loyalty with student name and styled format
     loyaltyDiv.innerHTML = `
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="material-icons" style="font-size: 2.5rem; color: ${style.color};">${style.icon}</span>
-                <span style="color: ${style.color};">${rank}</span>
+                <span style="color: ${style.color}; font-size: 2rem; font-weight: 700;">${rank}</span>
             </div>
-            <div style="font-size: 1.25rem; color: ${style.color}; font-weight: 600;">
-                ${points.toLocaleString('vi-VN')} điểm
+            <div style="text-align: center;">
+                <div style="font-size: 1.25rem; font-weight: 600; color: #1e293b; margin-bottom: 0.25rem;">${studentName}</div>
+                <div style="font-size: 1.1rem; color: ${style.color}; font-weight: 600;">
+                    ${points.toLocaleString('vi-VN')} điểm
+                </div>
             </div>
         </div>
     `;
     
-    showToast(`Hạng thành viên: ${rank} (${points} điểm)`, 'success', 'Thành công');
+    showToast(`${rank}: ${studentName} (${points} điểm)`, 'success', 'Thành công');
 }
 
 // ========================================
@@ -458,7 +457,6 @@ function displayAllTeachersRanking(teachers) {
         return `
             <tr>
                 <td style="text-align: center;">${index + 1}</td>
-                <td><code style="background: #f1f5f9; padding: 0.25rem 0.5rem; border-radius: 4px;">${teacher.Teacher_id}</code></td>
                 <td><strong>${teacher.TeacherName}</strong></td>
                 <td>${teacher.Expertise || '-'}</td>
                 <td style="text-align: center;">
@@ -635,7 +633,6 @@ function displayAllStudentsLoyalty(students) {
                 <td style="text-align: center;">
                     ${medalIcon || `<strong>${index + 1}</strong>`}
                 </td>
-                <td><code style="background: #f1f5f9; padding: 0.25rem 0.5rem; border-radius: 4px;">${student.Student_id}</code></td>
                 <td><strong>${student.StudentName}</strong></td>
                 <td style="text-align: center;">
                     <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.5rem; background: #dbeafe; border-radius: 6px;">

@@ -1,9 +1,10 @@
-﻿------------------------
+﻿﻿------------------------
 -- Task 2.3
 ------------------------
 -- THỦ TỤC 1:
 -- Thống kê Top khóa học có Rating cao nhất ---
 ------------------------
+GO
 CREATE OR ALTER PROCEDURE usp_GetTopRatedCourses
                 @PublishedYear INT, @MinFeedback INT
 AS
@@ -33,7 +34,7 @@ GO
 -----------------------------
 EXEC usp_GetTopRatedCourses 
      @PublishedYear = 2024,
-     @MinFeedback = 1; 
+     @MinFeedback = 5;
 GO
 
 EXEC usp_GetTopRatedCourses 
@@ -46,10 +47,6 @@ GO
 ------------------------
 -- THỦ TỤC 2:
 -- Thống kê chi tiết khóa học của Giảng viên ---
-
--- Input: TeacherId
--- Output: Thông tin khóa học, Số Feedback, Rating trung bình, Số HV đã đăng ký,
---         Điểm TB, Số chứng chỉ đã cấp, Doanh thu khóa học.
 ------------------------
 CREATE OR ALTER PROCEDURE usp_GetTeacherCourseStats
     @TeacherId CHAR(10)
@@ -57,37 +54,28 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- 1. Kiểm tra Giảng viên có tồn tại không
     IF NOT EXISTS (SELECT 1 FROM TEACHER WHERE Teacher_id = @TeacherId)
     BEGIN
         PRINT 'Error: Teacher with ID ' + @TeacherId + ' not found.';
         RETURN;
     END
 
-    -- 2. Truy vấn thống kê
-    -- Sử dụng các bảng dẫn xuất (Derived Tables) để tính toán trước khi JOIN 
-    -- nhằm tránh sai sót dữ liệu do quan hệ 1-N chồng chéo.
     SELECT 
         c.Course_id,
         c.Cour_name,
         
-        -- Thống kê Feedback
         COALESCE(F_Stats.NumFeedbacks, 0) AS TotalFeedbacks,
         COALESCE(F_Stats.AvgRating, 0)    AS AvgRating,
         
-        -- Thống kê Đăng ký (Register)
         COALESCE(R_Stats.NumRegistered, 0) AS NumRegisteredStudents,
         COALESCE(R_Stats.AvgFinalScore, 0) AS AvgFinalScore,
         
-        -- Thống kê Chứng chỉ (Certificate -> Receive)
         COALESCE(C_Stats.NumCertificates, 0) AS NumCertificatesReceived,
         
-        -- Tính Doanh thu: Giá * Số lượng HV đã thanh toán (completed)
         (c.Price * COALESCE(R_Stats.NumPaid, 0)) AS TotalRevenue
 
     FROM COURSE c
     
-    -- Join để lấy Feedback stats
     LEFT JOIN (
         SELECT Cour_id, 
                COUNT(Stu_id) AS NumFeedbacks, 
@@ -96,7 +84,6 @@ BEGIN
         GROUP BY Cour_id
     ) F_Stats ON c.Course_id = F_Stats.Cour_id
 
-    -- Join để lấy Register stats
     LEFT JOIN (
         SELECT Cour_id, 
                COUNT(Stu_id) AS NumRegistered,
@@ -106,7 +93,6 @@ BEGIN
         GROUP BY Cour_id
     ) R_Stats ON c.Course_id = R_Stats.Cour_id
 
-    -- Join để lấy Certificate stats
     LEFT JOIN (
         SELECT ce.Cour_id, COUNT(rc.Stu_id) AS NumCertificates
         FROM CERTIFICATE ce
@@ -125,6 +111,7 @@ GO
 EXEC usp_GetTeacherCourseStats @TeacherId = 'U000000009';
 GO
 
+
 EXEC usp_GetTeacherCourseStats @TeacherId = 'U000000012';
 GO
 
@@ -132,26 +119,12 @@ GO
 EXEC usp_GetTeacherCourseStats @TeacherId = 'U999999999';
 GO
 
-/* =========================================================
+﻿/* =========================================================
    TASK 2.3 - COURSE CRUD with Revenue Rule
-   Includes:
-     1) usp_InsertCourse
-     2) usp_UpdateCourse
-     3) usp_DeleteCourse
-     4) Testcases (with Vietnamese explanations)
-
-   Business Rule:
-   - Only allow UPDATE/DELETE when Total Revenue = 0
-   - Revenue = Price * COUNT(REGISTER with Payment_status = 'completed')
-
-   Notes:
-   - This script assumes columns exist in COURSE:
-       Course_id, Cour_name, Description, Language,
-       Num_lect, Total_time, Min_avg_score, Price,
-       Date_public, Num_student, Rating_avg, Tea_id
-   - If your DB name is different, change USE below.
-
 ========================================================= */
+
+-- USE EDUCITY;
+-- GO
 
 /* =========================================================
    1) INSERT COURSE
@@ -197,8 +170,6 @@ BEGIN
     END;
 
     -- 4. Insert
-    -- Rating_avg là derived column nên để NULL, sẽ được tính tự động từ FEEDBACK
-    -- Total_time cũng là derived nên set = NULL thay vì 0 (vì có CHECK > 0)
     INSERT INTO COURSE
     (
         Course_id, Cour_name, [Description], [Language],
@@ -208,8 +179,8 @@ BEGIN
     VALUES
     (
         @Course_id, @Cour_name, @Description, @Language,
-        0, NULL, @Min_avg_score, @Price,
-        @Date_public, 0, NULL, @Tea_id
+        null, null, @Min_avg_score, @Price,
+        @Date_public, null, null, @Tea_id
     );
 
     PRINT 'Insert course successfully.';
@@ -218,7 +189,6 @@ GO
 
 /* =========================================================
    2) UPDATE COURSE
-   Rule: Only allow when Revenue = 0
 ========================================================= */
 CREATE OR ALTER PROCEDURE usp_UpdateCourse
     @Course_id      CHAR(10),
@@ -304,7 +274,6 @@ GO
 
 /* =========================================================
    3) DELETE COURSE
-   Rule: Only allow when Revenue = 0
 ========================================================= */
 CREATE OR ALTER PROCEDURE usp_DeleteCourse
     @Course_id CHAR(10)
